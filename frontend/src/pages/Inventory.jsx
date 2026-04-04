@@ -122,7 +122,7 @@ const Inventory = () => {
               background: 'rgba(255,255,255,0.03)',
               border: '1px solid var(--border)',
               borderRadius: '12px',
-              color: 'white',
+              color: 'var(--text-main)',
               height: '48px',
               fontSize: '14px',
               outline: 'none',
@@ -132,7 +132,7 @@ const Inventory = () => {
             onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
           />
         </div>
-        <button className="btn" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}>
+        <button className="btn" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)' }}>
           <RefreshCw size={18} /> Sync Registry
         </button>
       </div>
@@ -215,7 +215,7 @@ const Inventory = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="input-group">
                 <label>CATEGORY</label>
-                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '0', color: 'white' }}>
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0', color: 'var(--text-main)' }}>
                   <option value="Linen">Linen</option>
                   <option value="Toiletries">Toiletries</option>
                   <option value="Minibar">Minibar</option>

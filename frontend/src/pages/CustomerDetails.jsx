@@ -40,7 +40,7 @@ const CustomerDetails = () => {
         <div style={{ position: 'relative', width: '300px' }}>
           <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
           <input 
-            style={{ width: '100%', padding: '12px 12px 12px 40px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'white' }}
+            style={{ width: '100%', padding: '12px 12px 12px 40px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}
             placeholder="Search by name or phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}

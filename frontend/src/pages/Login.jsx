@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Hotel } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,11 +17,23 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
-      // If login successful, move to OTP
-      navigate('/verify-otp', { state: { email } });
+      const data = await login(email, password);
+      // If token is present, we skipped OTP (Staff)
+      if (data.token) {
+        toast.success(`Welcome back, ${data.user?.name || 'Staff'}`);
+        navigate('/dashboard');
+      } else {
+        toast.success('Login successful! Please verify OTP.');
+        navigate('/verify-otp', { state: { email } });
+      }
     } catch (err) {
-      setError(err.response?.data?.msg || 'Invalid credentials');
+      if (!err.response) {
+        toast.error('Server is unreachable. Please ensure the backend is running.');
+        setError('Server reachable error');
+      } else {
+        toast.error(err.response?.data?.msg || 'Invalid credentials');
+        setError(err.response?.data?.msg || 'Invalid credentials');
+      }
     } finally {
       setLoading(false);
     }

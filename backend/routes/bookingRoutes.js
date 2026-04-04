@@ -17,4 +17,8 @@ router.put('/:id/check-out', protect, authorize('reception', 'superadmin', 'suba
 router.get('/active', protect, bookingController.getActiveBookings);
 router.get('/summary', protect, authorize('superadmin'), bookingController.getBookingSummary);
 
+// Room Service Tasks
+router.get('/services/pending', protect, bookingController.getPendingServices);
+router.patch('/:bookingId/services/:serviceId', protect, bookingController.updateServiceStatus);
+
 module.exports = router;

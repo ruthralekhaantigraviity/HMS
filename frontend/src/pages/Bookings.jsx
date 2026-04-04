@@ -7,6 +7,7 @@ import {
   CheckCircle, Star, MessageSquare, Clock, X, Brush, 
   IndianRupee, Loader2, Bell, Utensils, Zap, Wifi
 } from 'lucide-react';
+import Enrollment from './Enrollment';
 
 const Bookings = () => {
   const { user, token } = useAuth();
@@ -17,6 +18,7 @@ const Bookings = () => {
   const [penaltyData, setPenaltyData] = useState({ amount: 0, reason: '', isKeyReturned: false, isPropertyDamaged: false });
   const [review, setReview] = useState(5);
   const [showInvoice, setShowInvoice] = useState(false);
+  const [checkoutResult, setCheckoutResult] = useState(null);
   const [summary, setSummary] = useState({ day: 0, month: 0, year: 0 });
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
@@ -25,35 +27,37 @@ const Bookings = () => {
   const [showExtendModal, setShowExtendModal] = useState(null);
   const [extensionDays, setExtensionDays] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showEnrollModal, setShowEnrollModal] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch Active Bookings
+      const bookingsRes = await axios.get('http://localhost:5000/api/bookings/active', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBookings(bookingsRes.data);
+
+      // Fetch Summary if Super Admin
+      if (user?.role === 'superadmin') {
+        const summaryRes = await axios.get('http://localhost:5000/api/bookings/summary', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSummary(summaryRes.data);
+      }
+      // Fetch Available Services
+      const servicesRes = await axios.get('http://localhost:5000/api/services', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAvailableServices(servicesRes.data.filter(s => s.status === 'Active'));
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch Active Bookings
-        const bookingsRes = await axios.get('http://localhost:5000/api/bookings/active', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setBookings(bookingsRes.data);
-
-        // Fetch Summary if Super Admin
-        if (user?.role === 'superadmin') {
-          const summaryRes = await axios.get('http://localhost:5000/api/bookings/summary', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setSummary(summaryRes.data);
-        }
-        // Fetch Available Services
-        const servicesRes = await axios.get('http://localhost:5000/api/services', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setAvailableServices(servicesRes.data.filter(s => s.status === 'Active'));
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [token, user]);
 
@@ -104,7 +108,7 @@ const Bookings = () => {
 
   const handleCheckout = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${id}/check-out`, {
+      const res = await axios.put(`http://localhost:5000/api/bookings/${id}/check-out`, {
         penaltyAmount: penaltyData.amount,
         penaltyReason: penaltyData.reason,
         isKeyReturned: penaltyData.isKeyReturned,
@@ -112,12 +116,10 @@ const Bookings = () => {
         paymentMethod: checkoutBooking.paymentMethod
       }, { headers: { Authorization: `Bearer ${token}` } });
       
+      setCheckoutResult(res.data);
+      setCheckoutStage('success');
       setBookings(prev => prev.filter(b => b._id !== id));
-      setCheckoutBooking(null);
-      setCheckoutStage('audit');
       setPenaltyData({ amount: 0, reason: '', isKeyReturned: false, isPropertyDamaged: false });
-      setShowInvoice(true);
-      setTimeout(() => setShowInvoice(false), 3000);
     } catch (err) {
       alert('Error during checkout');
     }
@@ -147,57 +149,72 @@ const Bookings = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* ... (Header) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+      {/* Header Row: Title on Left, Button on Right */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
         <div>
-          <h1>Booking Management</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Policy: Check-out 11:00 AM daily.</p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '4px' }}>Booking Management</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Policy: Check-out 11:00 AM daily.</p>
         </div>
-        <button onClick={() => navigate('/dashboard/rooms')} className="btn btn-primary">
+        <button 
+          onClick={() => setShowEnrollModal(true)} 
+          style={{ 
+            background: '#d4af37', 
+            color: 'white', 
+            padding: '12px 24px', 
+            borderRadius: '12px', 
+            fontWeight: 700, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: '0.2s',
+            boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+        >
           <Calendar size={20} /> New Booking
         </button>
       </div>
 
-      {/* Expiry Alerts */}
+      {/* Attention Alert */}
       {bookings.some(b => getStayStatus(b.expectedCheckOut).pulse) && (
-        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', padding: '16px', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--danger)', fontWeight: 700 }}>
-          <Bell className="animate-pulse" size={20} /> Attention: Some guest stays are expiring or have expired! Please begin Property Audits.
+        <div style={{ 
+          background: '#fee2e2', 
+          border: '1px solid #ef4444', 
+          padding: '20px 24px', 
+          borderRadius: '12px', 
+          marginBottom: '32px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '16px', 
+          color: '#ef4444', 
+          fontWeight: 600,
+          fontSize: '15px',
+          marginTop: '24px'
+        }}>
+          <Bell size={24} /> Attention: Some guest stays are expiring or have expired! Please begin Property Audits.
         </div>
       )}
 
-      {/* Summary Cards */}
-      {user?.role === 'superadmin' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '32px' }}>
-          <div className="glass-card" style={{ padding: '24px', borderLeft: '4px solid var(--primary)' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Bookings Today</p>
-            <h2 style={{ fontSize: '2rem' }}>{summary?.day || 0}</h2>
-          </div>
-          <div className="glass-card" style={{ padding: '24px', borderLeft: '4px solid var(--success)' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>This Month</p>
-            <h2 style={{ fontSize: '2rem' }}>{summary?.month || 0}</h2>
-          </div>
-          <div className="glass-card" style={{ padding: '24px', borderLeft: '4px solid var(--warning)' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Active Rooms</p>
-            <h2 style={{ fontSize: '2rem' }}>{bookings.length}</h2>
-          </div>
-        </div>
-      )}
-
-      {/* ... (Tabs) */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', background: 'var(--surface)', padding: '6px', borderRadius: '12px', width: 'fit-content' }}>
+      {/* Navigation Tabs - Pill Style */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', marginTop: '24px' }}>
         {['active', 'history'].map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{ 
-              padding: '8px 24px', 
-              borderRadius: '8px', 
+              padding: '10px 32px', 
+              borderRadius: '20px', 
               textTransform: 'capitalize',
-              background: activeTab === tab ? 'var(--primary)' : 'transparent',
-              color: activeTab === tab ? 'var(--bg-dark)' : 'var(--text-muted)',
-              fontWeight: '600',
-              border: 'none',
-              cursor: 'pointer'
+              background: activeTab === tab ? '#d4af37' : 'white',
+              color: activeTab === tab ? 'white' : '#6b7280',
+              fontWeight: 700,
+              border: activeTab === tab ? 'none' : '1px solid #e5e7eb',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: '0.2s'
             }}
           >
             {tab}
@@ -205,42 +222,40 @@ const Bookings = () => {
         ))}
       </div>
       
-      {/* Search Bar */}
-      <div className="glass-card" style={{ padding: '20px', marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by Guest Name, Room #, or ID..." 
-            style={{ 
-              paddingLeft: '48px', 
-              width: '100%',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--border)',
-              borderRadius: '12px',
-              color: 'white',
-              height: '48px',
-              fontSize: '14px',
-              outline: 'none',
-              transition: 'var(--transition)'
-            }} 
-            onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
-          />
-        </div>
+      {/* Search Bar - Full Width Pill */}
+      <div style={{ position: 'relative', marginBottom: '32px' }}>
+        <Search size={20} style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+        <input 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by Guest Name, Room #, or ID..." 
+          style={{ 
+            paddingLeft: '60px', 
+            width: '100%',
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '16px',
+            color: '#1f2937',
+            height: '60px',
+            fontSize: '15px',
+            outline: 'none',
+            transition: '0.2s'
+          }} 
+          onFocus={(e) => e.target.style.borderColor = '#d4af37'}
+          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+        />
       </div>
 
-      <div className="glass-card" style={{ padding: 0 }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Booking ID</th>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Guest</th>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Room</th>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Stay Status</th>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Amount</th>
-              <th style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '14px', textAlign: 'right' }}>Actions</th>
+            <tr style={{ background: '#fafafa', borderBottom: '1px solid #f3f4f6' }}>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Booking ID</th>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Guest</th>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Room</th>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Stay Status</th>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Amount</th>
+              <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600, textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -250,76 +265,72 @@ const Bookings = () => {
               const status = getStayStatus(b.expectedCheckOut);
               return (
               <tr key={b._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '20px 24px', fontWeight: 'bold' }}>#{b._id?.slice(-6).toUpperCase()}</td>
-                <td style={{ padding: '20px 24px' }}>{b.customer?.name || b.guest || 'Walk-in Guest'}</td>
-                <td style={{ padding: '20px 24px' }}>{b.room?.roomNumber || 'N/A'}</td>
+                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 700 }}>#{b._id?.slice(-6).toUpperCase()}</td>
+                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 600 }}>{b.customer?.name || b.guest || 'Walk-in Guest'}</td>
+                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 600 }}>{b.room?.roomNumber || 'N/A'}</td>
                 <td style={{ padding: '20px 24px' }}>
-                  <span className={status.pulse ? 'animate-pulse' : ''} style={{ 
-                    padding: '4px 10px', 
-                    borderRadius: '20px', 
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    background: status.color + '20',
-                    color: status.color,
-                    border: '1px solid ' + status.color + '40'
-                  }}>
-                    {status.label}
-                  </span>
+                  {status.label === 'STAY EXPIRED' ? (
+                    <span style={{ color: '#ef4444', fontWeight: 800, fontSize: '12px' }}>STAY EXPIRED</span>
+                  ) : (
+                    <span style={{ color: '#10b981', fontWeight: 600, fontSize: '12px' }}>{status.label}</span>
+                  )}
                 </td>
-                <td style={{ padding: '20px 24px', fontWeight: 'bold' }}>
+                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 800 }}>
                   ₹{Math.round(b.totalAmount + (b.additionalServices?.filter(s => !s.isPaid).reduce((sum, s) => sum + s.price, 0) * 1.12))}
                 </td>
                 <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                   {activeTab === 'active' && (
-                      <>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                         <button 
                           onClick={() => {
-                            const status = getStayStatus(b.expectedCheckOut);
-                            if (status.label === 'STAY EXPIRED') {
-                              return alert("Already expired, can't add services.");
+                            if (getStayStatus(b.expectedCheckOut).label === 'STAY EXPIRED') {
+                              return alert("Stay expired, can't add services.");
                             }
-                            console.log('Opening Service Modal for:', b._id);
                             setShowServiceModal(b);
                           }}
-                          className="btn"
                           style={{ 
-                            padding: '6px 14px', 
+                            padding: '8px 16px', 
                             fontSize: '12px', 
-                            border: '1px solid var(--primary)', 
-                            color: 'var(--primary)', 
-                            background: 'transparent', 
+                            fontWeight: 700,
+                            border: '1px solid #d4af37', 
+                            color: '#d4af37', 
+                            background: 'white', 
                             cursor: 'pointer',
-                            marginRight: '8px',
-                            borderRadius: '0'
+                            borderRadius: '4px'
                           }}
                         >
                           Add Service
                         </button>
                         <button 
                           onClick={() => setShowExtendModal(b)}
-                          className="btn"
                           style={{ 
-                            padding: '6px 14px', 
+                            padding: '8px 16px', 
                             fontSize: '12px', 
-                            border: '1px solid var(--accent)', 
-                            color: 'var(--accent)', 
-                            background: 'transparent', 
+                            fontWeight: 700,
+                            border: '1px solid #a855f7', 
+                            color: '#a855f7', 
+                            background: 'white', 
                             cursor: 'pointer',
-                            marginRight: '8px',
-                            borderRadius: '0'
+                            borderRadius: '4px'
                           }}
                         >
                           Extend
                         </button>
                         <button 
                           onClick={() => setCheckoutBooking(b)}
-                          className="btn"
-                          style={{ padding: '6px 14px', fontSize: '12px', background: 'var(--primary)', color: 'var(--bg-dark)', cursor: 'pointer', borderRadius: '0' }}
+                          style={{ 
+                            padding: '8px 16px', 
+                            fontSize: '12px', 
+                            fontWeight: 700,
+                            background: '#d4af37', 
+                            color: 'white', 
+                            border: 'none',
+                            cursor: 'pointer',
+                            borderRadius: '4px'
+                          }}
                         >
                           Start Checkout
                         </button>
-                      </>
-                    )}
+                    </div>
                 </td>
               </tr>
             )})}
@@ -334,56 +345,87 @@ const Bookings = () => {
             {/* Modal Header */}
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ padding: '8px', background: 'rgba(251, 191, 36, 0.1)', color: 'var(--primary)', borderRadius: '8px' }}><LogOut size={20} /></div>
+                <div style={{ padding: '8px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '8px' }}><LogOut size={20} /></div>
                 <div>
-                  <h2 style={{ fontSize: '1.2rem', marginBottom: '2px' }}>Guest Checkout Formalities</h2>
+                  <h2 style={{ fontSize: '1.2rem', marginBottom: '2px', color: 'var(--text-main)' }}>Guest Checkout Formalities</h2>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Room {checkoutBooking.room?.roomNumber} • {checkoutBooking.customer?.name}</p>
                 </div>
               </div>
-              <button onClick={() => { setCheckoutBooking(null); setCheckoutStage('audit'); }} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={24} /></button>
+              <button onClick={() => { setCheckoutBooking(null); setCheckoutStage('audit'); }} style={{ background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={24} /></button>
             </div>
 
-            <div style={{ padding: '24px' }}>
+            <div style={{ padding: '24px', background: 'var(--bg-main)' }}>
               {checkoutStage === 'audit' && (
                 <div className="animate-fade-in">
-                  <h4 style={{ marginBottom: '16px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>Stage 1: Property Inspection</h4>
+                  <h4 style={{ marginBottom: '16px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>STAGE 1: PROPERTY INSPECTION</h4>
                   
                   <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
                     <div 
                       onClick={() => setPenaltyData({...penaltyData, isPropertyDamaged: !penaltyData.isPropertyDamaged})}
-                      style={{ padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', background: penaltyData.isPropertyDamaged ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s' }}
+                      style={{ 
+                        padding: '16px', 
+                        borderRadius: '12px', 
+                        border: '1px solid var(--border)', 
+                        background: penaltyData.isPropertyDamaged ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-sec)', 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        transition: '0.2s',
+                        color: 'var(--text-main)'
+                      }}
                     >
-                      <span>Property Damaged / Missing?</span>
-                      <div style={{ width: '20px', height: '20px', borderRadius: '4px', border: '2px solid' + (penaltyData.isPropertyDamaged ? 'var(--danger)' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontWeight: 600 }}>Property Damaged / Missing?</span>
+                      <div style={{ width: '20px', height: '20px', borderRadius: '4px', border: '2px solid ' + (penaltyData.isPropertyDamaged ? 'var(--danger)' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {penaltyData.isPropertyDamaged && <div style={{ width: '10px', height: '10px', background: 'var(--danger)', borderRadius: '1px' }}></div>}
                       </div>
                     </div>
 
                     {penaltyData.isPropertyDamaged && (
-                      <div className="animate-fade-in" style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: 'var(--danger)' }}>Penalty Amount (₹)</label>
-                        <input 
-                          type="number" 
-                          value={penaltyData.amount} 
-                          onChange={(e) => setPenaltyData({...penaltyData, amount: Number(e.target.value)})}
-                          placeholder="Enter penalty..." 
-                          style={{ marginBottom: '12px' }}
-                        />
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', color: 'var(--danger)' }}>Reason for Penalty</label>
-                        <input 
-                          value={penaltyData.reason} 
-                          onChange={(e) => setPenaltyData({...penaltyData, reason: e.target.value})}
-                          placeholder="e.g. Broken Mirror" 
-                        />
+                      <div className="animate-fade-in" style={{ padding: '20px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '16px', border: '1px solid var(--danger)', marginTop: '8px' }}>
+                        <div className="input-group" style={{ marginBottom: '16px' }}>
+                          <label style={{ color: 'var(--danger)', fontWeight: 800, fontSize: '12px', marginBottom: '8px' }}>PENALTY AMOUNT (REQUIRED) *</label>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold', color: 'var(--text-muted)' }}>₹</span>
+                            <input 
+                              type="number" 
+                              value={penaltyData.amount || ''} 
+                              onChange={(e) => setPenaltyData({...penaltyData, amount: e.target.value === '' ? '' : Number(e.target.value)})}
+                              placeholder="Enter manual amount..." 
+                              style={{ paddingLeft: '36px', height: '52px', fontSize: '1.1rem', fontWeight: 700, borderColor: 'var(--danger)' }}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+                        <div className="input-group" style={{ marginBottom: 0 }}>
+                          <label style={{ color: 'var(--danger)', fontWeight: 800, fontSize: '12px', marginBottom: '8px' }}>REASON FOR DAMAGE / MISSING ITEM</label>
+                          <input 
+                            value={penaltyData.reason} 
+                            onChange={(e) => setPenaltyData({...penaltyData, reason: e.target.value})}
+                            placeholder="e.g. Broken AC Remote, Wall Stains..." 
+                            style={{ height: '50px', fontSize: '14px' }}
+                          />
+                        </div>
                       </div>
                     )}
 
                     <div 
                       onClick={() => setPenaltyData({...penaltyData, isKeyReturned: !penaltyData.isKeyReturned})}
-                      style={{ padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', background: penaltyData.isKeyReturned ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s' }}
+                      style={{ 
+                        padding: '16px', 
+                        borderRadius: '12px', 
+                        border: '1px solid var(--border)', 
+                        background: penaltyData.isKeyReturned ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-sec)', 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        transition: '0.2s',
+                        color: 'var(--text-main)'
+                      }}
                     >
-                      <span>Room Key Submitted?</span>
-                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid' + (penaltyData.isKeyReturned ? 'var(--success)' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontWeight: 600 }}>Room Key Submitted?</span>
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid ' + (penaltyData.isKeyReturned ? 'var(--success)' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {penaltyData.isKeyReturned && <div style={{ width: '10px', height: '10px', background: 'var(--success)', borderRadius: '50%' }}></div>}
                       </div>
                     </div>
@@ -402,8 +444,8 @@ const Bookings = () => {
 
               {checkoutStage === 'completed' && (
                 <div className="animate-fade-in">
-                  <h4 style={{ marginBottom: '20px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--success)' }}>Stage 2: Final Billing</h4>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '20px', borderRadius: '16px', marginBottom: '24px' }}>
+                  <h4 style={{ marginBottom: '20px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--success)' }}>STAGE 2: FINAL BILLING</h4>
+                  <div style={{ background: 'var(--bg-sec)', padding: '20px', borderRadius: '16px', marginBottom: '24px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Room & Check-in Total</span>
                       <span>₹{checkoutBooking.totalAmount}</span>
@@ -446,21 +488,20 @@ const Bookings = () => {
                     className="btn" 
                     style={{ width: '100%', padding: '16px', background: 'var(--success)', color: 'var(--bg-dark)', fontWeight: 800, fontSize: '1rem' }}
                   >
-                    Mark as COMPLETED
+                    Finalize Billing
                   </button>
                 </div>
               )}
-
               {checkoutStage === 'review' && (
                 <div className="animate-fade-in">
-                   <h4 style={{ marginBottom: '24px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)', textAlign: 'center' }}>Final Stage: Customer Experience</h4>
+                   <h4 style={{ marginBottom: '24px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)', textAlign: 'center' }}>FINAL STAGE: CUSTOMER EXPERIENCE</h4>
                    <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                      <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>Rate the guest's behavior and stay experience</p>
                      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                         {[1, 2, 3, 4, 5].map(star => (
-                          <button key={star} onClick={() => setReview(star)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                            <Star size={40} fill={review >= star ? 'var(--primary)' : 'none'} color={review >= star ? 'var(--primary)' : 'var(--text-muted)'} />
-                          </button>
+                           <button key={star} onClick={() => setReview(star)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                             <Star size={40} fill={review >= star ? 'var(--primary)' : 'none'} color={review >= star ? 'var(--primary)' : 'var(--text-muted)'} />
+                           </button>
                         ))}
                      </div>
                    </div>
@@ -469,8 +510,58 @@ const Bookings = () => {
                     className="btn btn-primary" 
                     style={{ width: '100%', padding: '18px', fontSize: '1.2rem' }}
                   >
-                    Checkout & Release Room
+                    Checkout & Generate Bill
                   </button>
+                </div>
+              )}
+
+              {checkoutStage === 'success' && checkoutResult && (
+                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ width: '80px', height: '80px', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: 'var(--success)' }}>
+                    <CheckCircle size={48} />
+                  </div>
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '8px', color: 'var(--text-main)' }}>Checkout Successful!</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
+                    Reference ID: <span style={{ color: 'var(--primary)', fontWeight: 800 }}>#{checkoutResult._id.slice(-6).toUpperCase()}</span>
+                  </p>
+                  
+                  <div style={{ background: 'var(--bg-sec)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '32px', textAlign: 'left' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Room Number</span>
+                      <span style={{ fontWeight: 700 }}>{checkoutResult.room?.roomNumber}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Guest Name</span>
+                      <span style={{ fontWeight: 700 }}>{checkoutResult.customer?.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, color: 'var(--primary)', borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                      <span>Total Paid</span>
+                      <span>₹{Math.round(checkoutResult.totalAmount)}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                      onClick={() => window.print()}
+                      className="btn btn-primary" 
+                      style={{ flex: 2, padding: '16px', borderRadius: '12px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                      <Zap size={20} /> Print Official Receipt
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setCheckoutBooking(null);
+                        setCheckoutStage('audit');
+                        setCheckoutResult(null);
+                        setShowInvoice(true);
+                        setTimeout(() => setShowInvoice(false), 3000);
+                      }}
+                      className="btn" 
+                      style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'var(--bg-sec)', color: 'var(--text-main)', border: '1px solid var(--border)' }}
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -480,33 +571,50 @@ const Bookings = () => {
 
       {/* Add Service Modal */}
       {showServiceModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+            <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ fontSize: '1.25rem' }}>Add Service to Stay</h2>
+                <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Add Service to Stay</h2>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Room {showServiceModal.room?.roomNumber} • {showServiceModal.customer?.name}</p>
               </div>
-              <button onClick={() => setShowServiceModal(null)} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={20} /></button>
+              <button onClick={() => setShowServiceModal(null)} style={{ background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px' }}>
+            <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '16px' }}>
               {availableServices.map(s => {
                 const IconComp = { Utensils, Zap, Coffee, Wifi, IndianRupee }[s.icon] || Coffee;
                 return (
                   <button 
                     key={s._id}
                     onClick={() => handleAddService(showServiceModal._id, s)}
-                    className="glass-card"
-                    style={{ padding: '16px', textAlign: 'center', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
+                    style={{ 
+                      padding: '20px', 
+                      textAlign: 'center', 
+                      background: 'var(--bg-sec)', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: '16px',
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      gap: '12px',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-sec)'; }}
                   >
-                    <IconComp size={24} style={{ color: 'var(--primary)' }} />
-                    <div style={{ fontSize: '11px', fontWeight: 700 }}>{s.name}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 800 }}>₹{s.price}</div>
+                    <div style={{ padding: '10px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px', color: 'var(--primary)' }}>
+                      <IconComp size={24} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>{s.name}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--primary)' }}>₹{s.price}</div>
+                    </div>
                   </button>
                 )
               })}
-              {availableServices.length === 0 && <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>No active services found.</p>}
+              {availableServices.length === 0 && <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>No active services found.</p>}
             </div>
           </div>
         </div>
@@ -521,49 +629,136 @@ const Bookings = () => {
       {/* Extend Stay Modal */}
       {showExtendModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '32px', borderRadius: '0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '1.25rem' }}>Extend Stay</h2>
-              <button onClick={() => setShowExtendModal(null)} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={20} /></button>
-            </div>
-            
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>HOW MANY EXTRA DAYS?</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <button 
-                  onClick={() => setExtensionDays(Math.max(1, extensionDays - 1))}
-                  style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white', borderRadius: '0' }}
-                >-</button>
-                <div style={{ fontSize: '1.5rem', fontWeight: '800', width: '40px', textAlign: 'center' }}>{extensionDays}</div>
-                <button 
-                  onClick={() => setExtensionDays(extensionDays + 1)}
-                  style={{ width: '40px', height: '40px', background: 'var(--primary)', border: 'none', color: 'var(--bg-dark)', fontWeight: 'bold', borderRadius: '0' }}
-                >+</button>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+            <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Extend Stay</h2>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Room {showExtendModal.room?.roomNumber} • {showExtendModal.customer?.name}</p>
               </div>
+              <button onClick={() => setShowExtendModal(null)} style={{ background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '24px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px', fontWeight: 800, letterSpacing: '1px' }}>HOW MANY EXTRA DAYS?</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-sec)', padding: '8px', borderRadius: '16px', border: '1px solid var(--border)', width: 'fit-content' }}>
+                  <button 
+                    onClick={() => setExtensionDays(Math.max(1, extensionDays - 1))}
+                    style={{ width: '40px', height: '40px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '10px', fontSize: '1.2rem' }}
+                  >-</button>
+                  <div style={{ fontSize: '1.6rem', fontWeight: '800', width: '40px', textAlign: 'center', color: 'var(--text-main)' }}>{extensionDays}</div>
+                  <button 
+                    onClick={() => setExtensionDays(extensionDays + 1)}
+                    style={{ width: '40px', height: '40px', background: 'var(--primary)', border: 'none', color: 'var(--bg-dark)', fontWeight: 'bold', borderRadius: '10px', fontSize: '1.2rem' }}
+                  >+</button>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-sec)', padding: '20px', border: '1px solid var(--border)', marginBottom: '28px', borderRadius: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Additional Room Cost</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>₹{extensionDays * (showExtendModal.room?.price || 0)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '12px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>GST (12%)</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>₹{Math.round(extensionDays * (showExtendModal.room?.price || 0) * 0.12)}</span>
+                </div>
+                <div style={{ height: '1px', background: 'var(--border)', margin: '16px 0' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', color: 'var(--primary)', fontSize: '1.2rem' }}>
+                  <span>Total Extension Fee</span>
+                  <span>₹{Math.round(extensionDays * (showExtendModal.room?.price || 0) * 1.12)}</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => handleExtendStay(showExtendModal._id, extensionDays)}
+                className="btn btn-primary" 
+                style={{ width: '100%', padding: '18px', borderRadius: '12px', fontSize: '1.1rem' }}
+              >
+                Confirm Extension
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 🧾 OFFICIAL LETTERHEAD PRINT TEMPLATE */}
+      {checkoutResult && (
+        <div id="printable-bill" style={{ color: 'black', fontFamily: 'sans-serif' }}>
+            <div style={{ textAlign: 'center', marginBottom: '32px', borderBottom: '2px solid black', paddingBottom: '20px' }}>
+               <h1 style={{ fontSize: '32px', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '2px' }}>HOTEL GLITZ</h1>
+               <p style={{ fontSize: '12px', fontWeight: 600 }}>Luxury Redefined • Stay in Style</p>
+               <p style={{ fontSize: '10px', marginTop: '4px' }}>GSTIN: 33AAAAA0000A1Z5</p>
+               <p style={{ fontSize: '10px' }}>Address: 123 Elite Circle, Metropolitan City • Ph: +91 98888 77777</p>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', border: '1px solid var(--border)', marginBottom: '24px', borderRadius: '0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Additional Room Cost</span>
-                <span>₹{extensionDays * (showExtendModal.room?.price || 0)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>GST (12%)</span>
-                <span>₹{Math.round(extensionDays * (showExtendModal.room?.price || 0) * 0.12)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', borderTop: '1px solid var(--border)', paddingTop: '8px', color: 'var(--primary)' }}>
-                <span>Total Extension Fee</span>
-                <span>₹{Math.round(extensionDays * (showExtendModal.room?.price || 0) * 1.12)}</span>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '32px', fontSize: '12px' }}>
+               <div>
+                  <p style={{ fontWeight: 800, marginBottom: '8px', borderBottom: '1px solid #ddd' }}>GUEST DETAILS</p>
+                  <p>NAME: <strong>{checkoutResult.customer?.name}</strong></p>
+                  <p>CONTACT: <strong>{checkoutResult.customer?.phone}</strong></p>
+                  <p>ID: <strong>{checkoutResult.customer?.identityType} - {checkoutResult.customer?.identityNumber}</strong></p>
+               </div>
+               <div>
+                  <p style={{ fontWeight: 800, marginBottom: '8px', borderBottom: '1px solid #ddd' }}>BILLING SUMMARY</p>
+                  <p>ROOM NO: <strong>{checkoutResult.room?.roomNumber}</strong></p>
+                  <p>CHECK-IN: <strong>{new Date(checkoutResult.checkIn).toLocaleDateString()}</strong></p>
+                  <p>CHECK-OUT: <strong>{new Date(checkoutResult.checkOut).toLocaleDateString()}</strong></p>
+               </div>
             </div>
 
-            <button 
-              onClick={() => handleExtendStay(showExtendModal._id, extensionDays)}
-              className="btn btn-primary" 
-              style={{ width: '100%', padding: '14px', borderRadius: '0' }}
-            >
-              Confirm Extension
-            </button>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '32px' }}>
+               <thead>
+                  <tr style={{ background: '#f0f0f0', borderBottom: '1px solid black' }}>
+                     <th style={{ textAlign: 'left', padding: '8px' }}>Description</th>
+                     <th style={{ textAlign: 'right', padding: '8px' }}>Amount</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr style={{ borderBottom: '1px solid #eee' }}>
+                     <td style={{ padding: '8px' }}>Room Stay Charges (Total)</td>
+                     <td style={{ textAlign: 'right', padding: '8px' }}>₹{Math.round(checkoutResult.totalAmount - (checkoutResult.gstAmount || 0) - (checkoutResult.penaltyAmount || 0))}</td>
+                  </tr>
+                  {(checkoutResult.additionalServices || []).filter(s => s.isPaid).map((s, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                       <td style={{ padding: '8px' }}>{s.name}</td>
+                       <td style={{ textAlign: 'right', padding: '8px' }}>₹{s.price}</td>
+                    </tr>
+                  ))}
+                  {checkoutResult.penaltyAmount > 0 && (
+                    <tr style={{ borderBottom: '1px solid #eee', color: 'red' }}>
+                       <td style={{ padding: '8px' }}>Penalty: {checkoutResult.penaltyReason}</td>
+                       <td style={{ textAlign: 'right', padding: '8px' }}>₹{checkoutResult.penaltyAmount}</td>
+                    </tr>
+                  )}
+               </tbody>
+            </table>
+
+            <div style={{ marginLeft: 'auto', width: '250px', fontSize: '13px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}><span>Subtotal:</span><span>₹{Math.round(checkoutResult.totalAmount - (checkoutResult.gstAmount || 0))}</span></div>
+               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}><span>GST (12%):</span><span>₹{Math.round(checkoutResult.gstAmount || 0)}</span></div>
+               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: '2px solid black', fontWeight: 900, fontSize: '16px' }}><span>GRAND TOTAL:</span><span>₹{Math.round(checkoutResult.totalAmount)}</span></div>
+            </div>
+
+            <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
+               <div style={{ textAlign: 'center' }}><div style={{ borderTop: '1px solid black', width: '120px', marginTop: '40px' }}>Front Desk Signature</div></div>
+               <div style={{ textAlign: 'center' }}><div style={{ borderTop: '1px solid black', width: '120px', marginTop: '40px' }}>Guest Signature</div></div>
+            </div>
+            <p style={{ textAlign: 'center', marginTop: '40px', fontSize: '9px', color: '#666' }}>Computer Generated Invoice • No Signature Required for Validity</p>
+        </div>
+      )}
+      {showEnrollModal && (
+        <div style={{ 
+          position: 'fixed', 
+          inset: 0, 
+          background: 'rgba(0,0,0,0.85)', 
+          backdropFilter: 'blur(10px)', 
+          zIndex: 10000, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '40px'
+        }}>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '1100px', height: '90vh', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)', position: 'relative' }}>
+             <Enrollment isModal={true} onClose={() => { setShowEnrollModal(false); fetchData(); }} />
           </div>
         </div>
       )}

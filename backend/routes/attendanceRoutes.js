@@ -13,6 +13,12 @@ router.get('/today', protect, authorize('superadmin', 'subadmin'), attendanceCon
 
 // @route   GET api/attendance/date/:date
 // @desc    Get all attendance records for a specific date
-router.get('/date/:date', protect, authorize('superadmin', 'subadmin'), attendanceController.getAttendanceByDate);
+// @route   GET api/attendance/me
+// @desc    Get current user's attendance for the month
+router.get('/me', protect, attendanceController.getMyAttendance);
+
+// @route   POST api/attendance/mark-me
+// @desc    Mark own attendance for today
+router.post('/mark-me', protect, attendanceController.markMyAttendance);
 
 module.exports = router;

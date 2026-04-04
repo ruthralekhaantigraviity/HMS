@@ -34,3 +34,14 @@ exports.releaseSalary = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+// @route   GET api/payouts/me
+// @desc    Get current user's payout history
+exports.getMyPayouts = async (req, res) => {
+  try {
+    const history = await Payout.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.json(history);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+};

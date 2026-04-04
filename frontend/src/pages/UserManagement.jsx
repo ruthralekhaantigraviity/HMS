@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { UserPlus, Search, Edit2, Trash2, Shield, UserCheck, Loader2 } from 'lucide-react';
+import { UserPlus, Search, Edit2, Trash2, Shield, UserCheck, Loader2, X, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const UserManagement = () => {
@@ -11,10 +11,24 @@ const UserManagement = () => {
   const [creating, setCreating] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
   const [formData, setFormData] = useState({ 
-    name: '', email: '', role: 'subadmin', permissions: [],
+    role: 'subadmin', permissions: [],
     phone: '', location: '', aadhar: '', pan: '', salary: 0
   });
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
+  const togglePasswordVisibility = (userId) => {
+    setVisiblePasswords(prev => ({ ...prev, [userId]: !prev[userId] }));
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -43,20 +57,69 @@ const UserManagement = () => {
     }));
   };
 
+  const handleEdit = (user) => {
+    setFormData({
+      name: user.name,
+      email: user.email,
+      password: '', // Leave blank unless changing
+      role: user.role,
+      permissions: user.permissions || [],
+      phone: user.phone || '',
+      location: user.location || '',
+      aadhar: user.aadhar || '',
+      pan: user.pan || '',
+      salary: user.salary || 0
+    });
+    setSelectedUserId(user._id);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
+    const id = confirmModal.id;
+    setConfirmModal({ ...confirmModal, show: false });
+    try {
+      await axios.delete(`http://localhost:5000/api/auth/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchUsers();
+      showToast('User deleted successfully!');
+    } catch (err) {
+      showToast(err.response?.data?.msg || 'Error deleting user', 'error');
+    }
+  };
+
+  const promptDelete = (id) => {
+    setConfirmModal({
+      show: true,
+      id,
+      title: 'Confirm Deletion',
+      message: 'Are you sure you want to permanently remove this staff member? This action cannot be undone.'
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCreating(true);
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
-        ...formData
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (isEditing) {
+        await axios.put(`http://localhost:5000/api/auth/${selectedUserId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('User updated successfully!');
+      } else {
+        await axios.post('http://localhost:5000/api/auth/register', formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('User created successfully!');
+      }
       setShowModal(false);
-      setFormData({ name: '', email: '', role: 'subadmin', permissions: [] });
+      setIsEditing(false);
+      setSelectedUserId(null);
+      setFormData({ name: '', email: '', password: '', role: 'subadmin', permissions: [], phone: '', location: '', aadhar: '', pan: '', salary: 0 });
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.msg || 'Error creating user');
+      showToast(err.response?.data?.msg || 'Error processing request', 'error');
     } finally {
       setCreating(false);
     }
@@ -65,7 +128,8 @@ const UserManagement = () => {
   const filteredUsers = users.filter(u => {
     if (activeTab === 'subadmins') return u.role === 'subadmin';
     if (activeTab === 'reception') return u.role === 'reception';
-    return u.role === 'housekeeping' || u.role === 'roomservice';
+    if (activeTab === 'operations') return ['housekeeping', 'roomservice'].includes(u.role);
+    return false;
   });
 
   return (
@@ -75,18 +139,20 @@ const UserManagement = () => {
           <h1>User Management</h1>
           <p style={{ color: 'var(--text-muted)' }}>Manage your hotel staff, sub-admins, and permissions.</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn btn-primary">
+        <button onClick={() => { setIsEditing(false); setShowModal(true); }} className="btn btn-primary">
           <UserPlus size={18} /> Add New User
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', borderBottom: '1px solid var(--border)' }}>
-        <button 
-          onClick={() => setActiveTab('subadmins')}
-          style={{ padding: '12px 24px', background: 'none', color: activeTab === 'subadmins' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'subadmins' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
-        >
-          Sub Admins
-        </button>
+        {token && JSON.parse(atob(token.split('.')[1])).role === 'superadmin' && (
+          <button 
+            onClick={() => setActiveTab('subadmins')}
+            style={{ padding: '12px 24px', background: 'none', color: activeTab === 'subadmins' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'subadmins' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
+          >
+            Sub Admins
+          </button>
+        )}
         <button 
           onClick={() => setActiveTab('reception')}
           style={{ padding: '12px 24px', background: 'none', color: activeTab === 'reception' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'reception' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
@@ -110,6 +176,7 @@ const UserManagement = () => {
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Name</th>
                 <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Email</th>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Password</th>
                 <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Permissions</th>
                 <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Status</th>
                 <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px', textAlign: 'right' }}>Actions</th>
@@ -130,9 +197,23 @@ const UserManagement = () => {
                   </td>
                   <td style={{ padding: '20px 24px', color: 'var(--text-muted)' }}>{user.email}</td>
                   <td style={{ padding: '20px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <code style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', color: 'var(--primary)', letterSpacing: '1px', minWidth: '100px', textAlign: 'center' }}>
+                        {visiblePasswords[user._id] ? (user.plainPassword || 'password123') : '●●●●●●●●'}
+                      </code>
+                      <button 
+                        onClick={() => togglePasswordVisibility(user._id)}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                        title={visiblePasswords[user._id] ? "Hide Password" : "Show Password"}
+                      >
+                        {visiblePasswords[user._id] ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </td>
+                  <td style={{ padding: '20px 24px' }}>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {user.permissions?.map(p => (
-                        <span key={p} style={{ fontSize: '11px', padding: '4px 8px', background: 'rgba(251, 191, 36, 0.1)', color: 'var(--primary)', borderRadius: '4px' }}>{p}</span>
+                        <span key={p} style={{ fontSize: '11px', padding: '4px 8px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '4px' }}>{p}</span>
                       ))}
                     </div>
                   </td>
@@ -140,8 +221,8 @@ const UserManagement = () => {
                     <span style={{ fontSize: '12px', color: user.isVerified ? 'var(--success)' : 'var(--danger)' }}>● {user.isVerified ? 'Active' : 'Pending'}</span>
                   </td>
                   <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                    <button style={{ background: 'none', color: 'var(--text-muted)', padding: '4px' }}><Edit2 size={16} /></button>
-                    <button style={{ background: 'none', color: 'var(--danger)', padding: '4px', marginLeft: '8px' }}><Trash2 size={16} /></button>
+                    <button onClick={() => handleEdit(user)} style={{ background: 'none', color: 'var(--text-muted)', padding: '4px', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                    <button onClick={() => promptDelete(user._id)} style={{ background: 'none', color: 'var(--danger)', padding: '4px', marginLeft: '8px', cursor: 'pointer' }}><Trash2 size={16} /></button>
                   </td>
                 </tr>
               ))}
@@ -151,16 +232,29 @@ const UserManagement = () => {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <form onSubmit={handleSubmit} className="glass-card" style={{ width: '500px', padding: '32px' }}>
-            <h2 style={{ marginBottom: '24px' }}>Add New User</h2>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '40px' }}>
+          <form onSubmit={handleSubmit} className="glass-card" style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', scrollbarWidth: 'thin', position: 'relative' }}>
+            <button 
+              type="button" 
+              onClick={() => setShowModal(false)} 
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <X size={24} />
+            </button>
+            <h2 style={{ marginBottom: '24px' }}>{isEditing ? 'Edit Existing User' : 'Add New User'}</h2>
             <div className="input-group">
               <label>Full Name</label>
               <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Alex Johnson" required />
             </div>
-            <div className="input-group">
-              <label>Email Address</label>
-              <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="alex@hms.com" required />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="input-group">
+                <label>Email Address</label>
+                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="alex@hms.com" required />
+              </div>
+              <div className="input-group">
+                <label>Login Password</label>
+                <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder={isEditing ? "(Change Password or leave blank)" : "Set Password"} required={!isEditing} />
+              </div>
             </div>
             <div className="input-group">
               <label>Staff Role</label>
@@ -168,7 +262,7 @@ const UserManagement = () => {
                 value={formData.role} 
                 onChange={e => setFormData({...formData, role: e.target.value})} 
                 required
-                style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white' }}
+                style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)' }}
               >
                 <option value="subadmin">Sub Admin</option>
                 <option value="reception">Receptionist</option>
@@ -216,12 +310,54 @@ const UserManagement = () => {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" onClick={() => setShowModal(false)} className="btn" style={{ flex: 1, background: 'rgba(255,255,255,0.05)' }}>Cancel</button>
+              <button 
+                type="button" 
+                onClick={() => setShowModal(false)} 
+                className="btn" 
+                style={{ 
+                  flex: 1, 
+                  background: 'var(--surface)', 
+                  color: 'var(--text-main)', 
+                  border: '1px solid var(--border)',
+                  justifyContent: 'center'
+                }}
+              >
+                Cancel
+              </button>
               <button type="submit" disabled={creating} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
-                {creating ? <Loader2 className="animate-spin" size={18} /> : 'Create User'}
+                {creating ? <Loader2 className="animate-spin" size={18} /> : (isEditing ? 'Update User' : 'Create User')}
               </button>
             </div>
           </form>
+        </div>
+      )}
+      {/* Toast Notification */}
+      {toast.show && (
+        <div style={{ 
+          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', 
+          background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)', 
+          color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, 
+          zIndex: 2000, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', display: 'flex', 
+          alignItems: 'center', gap: '10px' 
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+          {toast.message}
+        </div>
+      )}
+      {/* Confirm Deletion Modal */}
+      {confirmModal.show && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
+          <div className="glass-card animate-scale-in" style={{ width: '400px', padding: '32px', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Trash2 size={32} />
+            </div>
+            <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>{confirmModal.title}</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>{confirmModal.message}</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', justifyContent: 'center' }}>Cancel</button>
+              <button onClick={confirmDelete} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', border: 'none', justifyContent: 'center', fontWeight: 800 }}>Confirm Delete</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

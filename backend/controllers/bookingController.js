@@ -6,16 +6,26 @@ const financialController = require('./financialController');
 // @route   POST api/bookings/check-in
 // @desc    Start booking and occupy room
 exports.checkIn = async (req, res) => {
-  const { customerId, roomId, checkIn, duration, totalAmount, additionalServices, gstAmount, paymentMethod } = req.body;
+  const { 
+    customerId, roomId, checkIn, duration, totalAmount, additionalServices, 
+    gstAmount, paymentMethod, alternatePhone, vehicleType, vehicleNumber, 
+    guestCount, additionalGuests, isKids, kidsAge, isPets, 
+    isKitchenAllowance, hasGst, gstRate 
+  } = req.body;
+  
   try {
     const room = await Room.findById(roomId);
-    if (!room || room.status !== 'Available') {
-      return res.status(400).json({ msg: 'Room not available' });
+    if (!room) {
+      return res.status(404).json({ msg: 'Target Room not found in database' });
+    }
+    
+    if (room.status !== 'Available') {
+      return res.status(400).json({ msg: `Room ${room.roomNumber} is currently ${room.status}. Please select an Available room.` });
     }
 
     const checkInDate = checkIn ? new Date(checkIn) : new Date();
     
-    // Calculate Expected Checkout (Always 11:00 AM on the day after stayDays)
+    // Calculate Expected Checkout
     const expected = new Date(checkInDate);
     expected.setDate(expected.getDate() + Number(req.body.stayDays || 1));
     expected.setHours(11, 0, 0, 0);
@@ -27,11 +37,25 @@ exports.checkIn = async (req, res) => {
       stayDays: req.body.stayDays || 1,
       expectedCheckOut: expected,
       totalAmount,
-      additionalServices: (additionalServices || []).map(s => ({ ...s, isPaid: true })),
+      additionalServices: (additionalServices || []).map(s => ({ ...s, isPaid: true, status: 'Delivered' })),
       gstAmount,
       paymentMethod: paymentMethod || 'Cash',
       paymentStatus: 'Paid',
-      status: 'Active'
+      status: 'Active',
+      alternatePhone,
+      vehicleType,
+      vehicleNumber,
+      guestCount,
+      additionalGuests,
+      isKids,
+      kidsAge,
+      isPets,
+      isKitchenAllowance,
+      hasGst,
+      gstRate,
+      bookingType: req.body.bookingType,
+      referrerName: req.body.referrerName,
+      manualPrice: req.body.manualPrice
     });
 
     await booking.save();
@@ -42,7 +66,8 @@ exports.checkIn = async (req, res) => {
 
     res.json(booking);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Booking Operation Error:', err);
+    res.status(500).json({ msg: `Check-in Failed: ${err.message}` });
   }
 };
 
@@ -58,7 +83,8 @@ exports.addService = async (req, res) => {
     await booking.save();
     res.json(booking);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Booking Operation Error:', err);
+    res.status(500).json({ msg: `Check-in Error: ${err.message}` });
   }
 };
 
@@ -67,7 +93,7 @@ exports.addService = async (req, res) => {
 exports.checkOut = async (req, res) => {
   const { checkOutTime, paymentMethod, penaltyAmount, penaltyReason, isKeyReturned, isPropertyDamaged } = req.body;
   try {
-    const booking = await Booking.findById(req.params.id).populate('room');
+    const booking = await Booking.findById(req.params.id).populate('room').populate('customer');
     if (!booking) return res.status(404).json({ msg: 'Booking not found' });
 
     const leaveTime = checkOutTime ? new Date(checkOutTime) : new Date();
@@ -104,14 +130,15 @@ exports.checkOut = async (req, res) => {
     // Sync Revenue
     await financialController.syncBookingRevenue(booking);
 
-    // Update Room Status
+    // Update Room Status based on damage reports
     const room = await Room.findById(booking.room._id);
-    room.status = 'Available';
+    room.status = isPropertyDamaged ? 'Maintenance' : 'Cleaning';
     await room.save();
 
     res.json(booking);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Booking Operation Error:', err);
+    res.status(500).json({ msg: `Check-in Error: ${err.message}` });
   }
 };
 
@@ -141,7 +168,7 @@ exports.extendStay = async (req, res) => {
     res.json(booking);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Booking Operation Failed: Server Connectivity Error' });
   }
 };
 
@@ -154,7 +181,8 @@ exports.getActiveBookings = async (req, res) => {
       .populate('room');
     res.json(bookings);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Booking Operation Error:', err);
+    res.status(500).json({ msg: `Check-in Error: ${err.message}` });
   }
 };
 
@@ -175,6 +203,59 @@ exports.getBookingSummary = async (req, res) => {
 
     res.json({ day, month, year });
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Booking Operation Error:', err);
+    res.status(500).json({ msg: `Check-in Error: ${err.message}` });
+  }
+};
+
+// @route   GET api/bookings/services/pending
+// @desc    Get all pending service requests for room service
+exports.getPendingServices = async (req, res) => {
+  try {
+    const activeBookings = await Booking.find({ 
+      status: 'Active',
+      'additionalServices.status': 'Pending' 
+    }).populate('customer', 'name').populate('room', 'roomNumber');
+
+    // Flatten and filter for only pending services with booking context
+    const pendingTasks = [];
+    activeBookings.forEach(booking => {
+      booking.additionalServices.forEach(service => {
+        if (service.status === 'Pending') {
+          pendingTasks.push({
+            bookingId: booking._id,
+            serviceId: service._id,
+            roomNumber: booking.room?.roomNumber,
+            guestName: booking.customer?.name,
+            serviceName: service.name,
+            createdAt: service.createdAt || booking.updatedAt
+          });
+        }
+      });
+    });
+
+    res.json(pendingTasks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Booking Operation Failed: Server Connectivity Error' });
+  }
+};
+
+// @route   PATCH api/bookings/:bookingId/services/:serviceId
+// @desc    Update status of a specific service order
+exports.updateServiceStatus = async (req, res) => {
+  const { status } = req.body; // e.g., 'Delivered'
+  try {
+    const booking = await Booking.findOneAndUpdate(
+      { _id: req.params.bookingId, "additionalServices._id": req.params.serviceId },
+      { $set: { "additionalServices.$.status": status } },
+      { new: true }
+    );
+
+    if (!booking) return res.status(404).json({ msg: 'Order not found' });
+    res.json(booking);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Booking Operation Failed: Server Connectivity Error' });
   }
 };

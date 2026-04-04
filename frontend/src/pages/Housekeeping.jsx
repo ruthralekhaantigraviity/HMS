@@ -61,8 +61,8 @@ const Housekeeping = () => {
                 borderRadius: '12px', 
                 fontSize: '11px', 
                 fontWeight: 700,
-                background: room.status === 'Available' ? 'rgba(34, 197, 94, 0.1)' : room.status === 'Maintenance' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(234, 179, 8, 0.1)',
-                color: room.status === 'Available' ? 'var(--success)' : room.status === 'Maintenance' ? 'var(--danger)' : 'var(--warning)'
+                background: room.status === 'Available' ? 'rgba(34, 197, 94, 0.1)' : room.status === 'Cleaning' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                color: room.status === 'Available' ? 'var(--success)' : room.status === 'Cleaning' ? '#3b82f6' : '#9ca3af'
               }}>
                 {room.status}
               </div>
@@ -84,10 +84,10 @@ const Housekeeping = () => {
             </div>
             
             <button 
-              onClick={() => updateStatus(room._id, 'Waiting')}
+              onClick={() => updateStatus(room._id, 'Cleaning')}
               style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '8px', color: 'var(--warning)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '13px' }}
             >
-              <Clock size={14} /> Mark for Cleaning
+              <Clock size={14} /> Internal Cleaning Order
             </button>
           </div>
         ))}

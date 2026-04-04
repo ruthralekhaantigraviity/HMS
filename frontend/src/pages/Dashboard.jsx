@@ -6,7 +6,8 @@ import {
   LogOut, LayoutDashboard, Calendar, ClipboardList, 
   UserPlus, UserCheck, Bell, Search, Menu, X,
   Shield, BarChart, CalendarCheck, FileText, IndianRupee,
-  Brush, Coffee, Clock
+  Brush, Coffee, Clock, Utensils, MessageSquare,
+  Sun, Moon, AlertCircle, Globe
 } from 'lucide-react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Summary from './Summary';
@@ -25,6 +26,11 @@ import Housekeeping from './Housekeeping';
 import Services from './Services';
 import Staff from './Staff';
 import Inventory from './Inventory';
+import StaffSummary from './StaffSummary';
+import RoomServiceTasks from './RoomServiceTasks';
+import StaffPayouts from './StaffPayouts';
+import Queries from './Queries';
+import TechnicalIssues from './TechnicalIssues';
 
 const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   <Link 
@@ -41,10 +47,28 @@ const Dashboard = () => {
   const { user, login, logout, token } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Global Monitoring for New Arrivals & Coming Checkouts
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      setIsDarkMode(false);
+      document.body.setAttribute('data-theme', 'light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = isDarkMode ? 'light' : 'dark';
+    setIsDarkMode(!isDarkMode);
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
   useEffect(() => {
     const checkStatus = async () => {
       try {
@@ -53,91 +77,100 @@ const Dashboard = () => {
         });
         
         const now = new Date();
-        const alerts = res.data.map(b => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        const fetchedAlerts = data.map(b => {
+          if (!b || !b.expectedCheckOut) return null;
           const expiryDiff = (new Date(b.expectedCheckOut) - now) / (1000 * 60);
           const arrivalDiff = (now - new Date(b.createdAt)) / (1000 * 60);
 
           if (expiryDiff > 0 && expiryDiff <= 30) {
-            return { id: b._id, type: 'expiry', room: b.room?.roomNumber, time: Math.round(expiryDiff) };
+            return { id: b._id, type: 'expiry', room: b.room?.roomNumber || 'Unknown', time: Math.round(expiryDiff) };
           }
-          // Only show arrivals to admins/sub-admins
           if (arrivalDiff <= 15 && user?.role !== 'reception') {
-            return { id: b._id, type: 'arrival', room: b.room?.roomNumber, guest: b.customer?.name };
+            return { id: b._id, type: 'arrival', room: b.room?.roomNumber || 'Unknown', guest: b.customer?.name || 'Guest' };
           }
           return null;
         }).filter(a => a !== null);
-        // ADDING DUMMY NOTIFICATION FOR TESTING (Remove in production)
-        alerts.push({ id: 'dummy-1', type: 'expiry', room: '999', time: 15 });
+
+        // Add dummy notifications as requested for demonstration
+        const dummyAlerts = [
+          { id: 'dummy-1', type: 'expiry', room: '302', time: 15, isDummy: true },
+          { id: 'dummy-2', type: 'expiry', room: '105', time: 5, isDummy: true }
+        ];
         
-        setNotifications(alerts);
+        setNotifications([...dummyAlerts, ...fetchedAlerts]);
       } catch (err) {
         console.error('Notification fetch error:', err);
       }
     };
 
-    if (token) {
+    if (token && user) {
       checkStatus();
       const interval = setInterval(checkStatus, 60000);
       return () => clearInterval(interval);
     }
-  }, [token]);
+  }, [token, user?.role]); // Only re-run if role changes, to avoid loops
 
   const getMenuForRole = (role) => {
     switch(role) {
       case 'superadmin':
+      case 'subadmin':
         return [
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
           { icon: CalendarCheck, label: 'Booking Overview', path: '/dashboard/bookings' },
           { icon: Users, label: 'Customer Details', path: '/dashboard/customers' },
           { icon: BedDouble, label: 'Rooms Status', path: '/dashboard/rooms' },
+          { icon: MessageSquare, label: 'Guest Queries', path: '/dashboard/queries' },
           { icon: Brush, label: 'Housekeeping', path: '/dashboard/housekeeping' },
           { icon: Coffee, label: 'Services', path: '/dashboard/services' },
           { icon: Shield, label: 'User Management', path: '/dashboard/users' },
           { icon: UserCheck, label: 'Staff Directory', path: '/dashboard/staff' },
-          { icon: UserPlus, label: 'Enrollment', path: '/dashboard/enroll' },
+          { icon: CalendarCheck, label: 'Booking', path: '/dashboard/enroll' },
           { icon: IndianRupee, label: 'Salary Management', path: '/dashboard/salary' },
           { icon: Wallet, label: 'Financial Mgt', path: '/dashboard/finance' },
           { icon: ClipboardList, label: 'Inventory Management', path: '/dashboard/inventory' },
-          { icon: BarChart, label: 'Analytics', path: '/dashboard/analytics' },
-          { icon: Settings, label: 'Setting', path: '/dashboard/system' },
-        ];
-      case 'subadmin':
-        return [
-          { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-          { icon: CalendarCheck, label: 'Booking Management', path: '/dashboard/bookings' },
-          { icon: Users, label: 'Customer Details', path: '/dashboard/customers' },
-          { icon: BedDouble, label: 'Rooms Status', path: '/dashboard/rooms' },
-          { icon: Brush, label: 'Housekeeping', path: '/dashboard/housekeeping' },
-          { icon: Coffee, label: 'Services', path: '/dashboard/services' },
-          { icon: BedDouble, label: 'Hotel Management', path: '/dashboard/hotel' },
-          { icon: ClipboardList, label: 'Inventory Management', path: '/dashboard/inventory' },
-          { icon: UserCheck, label: 'Staff Details', path: '/dashboard/staff' },
-          { icon: IndianRupee, label: 'Salary Management', path: '/dashboard/salary' },
-          { icon: FileText, label: 'Basic Reports', path: '/dashboard/reports' },
+          { icon: BarChart, label: 'Revenue', path: '/dashboard/analytics' },
+          { icon: AlertCircle, label: 'Technical Issues', path: '/dashboard/tech-issues' },
+          { icon: Settings, label: 'Setting', path: '/dashboard/system' }
         ];
       case 'reception':
         return [
-          { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
-          { icon: BedDouble, label: 'Rooms Status', path: '/dashboard/rooms' },
-          { icon: UserPlus, label: 'Check In', path: '/dashboard/enroll' },
-          { icon: Calendar, label: 'Check Out', path: '/dashboard/bookings' },
-          { icon: Users, label: 'Customer Registry', path: '/dashboard/customers' },
+          { icon: LayoutDashboard, label: 'Room Dashboard', path: '/dashboard' },
+          { icon: CalendarCheck, label: 'New Booking', path: '/dashboard/bookings' },
+          { icon: AlertCircle, label: 'Technical Issues', path: '/dashboard/tech-issues' },
+          { icon: FileText, label: 'Room Information', path: '/dashboard/rooms' },
+          { icon: Clock, label: 'Room History', path: '/dashboard/reports' },
+          { icon: Settings, label: 'Settings', path: '/dashboard/system' }
+        ];
+      case 'housekeeping':
+        return [
+          { icon: LayoutDashboard, label: 'My HRM Stats', path: '/dashboard' },
+          { icon: AlertCircle, label: 'Technical Issues', path: '/dashboard/tech-issues' },
+          { icon: IndianRupee, label: 'Salary Records', path: '/dashboard/payouts' }
+        ];
+      case 'roomservice':
+        return [
+          { icon: LayoutDashboard, label: 'My HRM Stats', path: '/dashboard' },
+          { icon: Utensils, label: 'Service Orders', path: '/dashboard/tasks' },
+          { icon: AlertCircle, label: 'Technical Issues', path: '/dashboard/tech-issues' },
+          { icon: IndianRupee, label: 'Salary Records', path: '/dashboard/payouts' }
         ];
       default: return [];
     }
   };
 
-  const menu = getMenuForRole(user?.role);
+  const role = user?.role || 'unknown';
+  const menu = getMenuForRole(role);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-dark)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', transition: 'var(--transition)' }}>
       {/* Sidebar */}
       <div style={{ 
         width: sidebarOpen ? '260px' : '0', 
         transition: 'var(--transition)', 
         overflowY: 'auto',
         overflowX: 'hidden',
-        background: 'var(--surface)',
+        background: 'var(--bg-main)',
         borderRight: '1px solid var(--border)',
         zIndex: 50,
         position: 'relative',
@@ -147,26 +180,25 @@ const Dashboard = () => {
       }}>
         <div style={{ padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', color: 'var(--bg-dark)' }}>
+            <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', color: 'white' }}>
               <BedDouble size={24} />
             </div>
-            <h2 style={{ fontSize: '1.25rem', color: 'white' }}>HMS Elite</h2>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz</h2>
           </div>
-
-          <nav>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {menu.map((item, idx) => (
               <SidebarItem 
                 key={idx} 
                 icon={item.icon} 
                 label={item.label} 
                 path={item.path} 
-                active={location.pathname === item.path}
+                active={location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path))}
               />
             ))}
           </nav>
         </div>
 
-        <div style={{ padding: '24px', position: 'sticky', bottom: 0, background: 'var(--surface)' }}>
+        <div style={{ padding: '24px', position: 'sticky', bottom: 0, background: 'var(--bg-main)', borderTop: '1px solid var(--border)' }}>
           <button 
             onClick={logout}
             style={{ 
@@ -180,7 +212,8 @@ const Dashboard = () => {
               borderRadius: '12px',
               fontWeight: '600',
               border: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontFamily: 'Outfit'
             }}
           >
             <LogOut size={20} />
@@ -190,14 +223,17 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-sec)' }}>
         {/* Header */}
-        <header style={{ height: '70px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', color: 'white' }}>
+        <header style={{ height: '70px', background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', position: 'sticky', top: 0, zIndex: 40 }}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', color: 'var(--text-main)', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}>
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '50%', transition: 'var(--transition)' }}>
+               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             <div style={{ position: 'relative' }}>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -211,7 +247,6 @@ const Dashboard = () => {
                 )}
               </button>
 
-              {/* Notification Overlay */}
               {showNotifications && (
                 <div className="glass-card animate-fade-in" style={{ position: 'absolute', top: '45px', right: '0', width: '320px', padding: '16px', zIndex: 100, border: '1px solid var(--border)', maxHeight: '400px', overflowY: 'auto' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -260,10 +295,10 @@ const Dashboard = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: 'white' }}>{user?.name}</p>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-main)' }}>{user?.name}</p>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user?.role}</p>
               </div>
-              <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-dark)', fontWeight: 'bold' }}>
+              <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
                 {user?.name?.charAt(0)}
               </div>
             </div>
@@ -273,22 +308,55 @@ const Dashboard = () => {
         {/* Dynamic Pages */}
         <main style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
           <Routes>
-            <Route index element={<Summary />} />
-            <Route path="rooms" element={<Rooms />} />
-            <Route path="bookings" element={<Bookings />} />
-            <Route path="enroll" element={<Enrollment />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="hotel" element={<HotelManagement />} />
-            <Route path="finance" element={<FinancialManagement />} />
-            <Route path="system" element={<SystemControl />} />
-            <Route path="analytics" element={<Analytics />} />
+            <Route index element={
+              user ? (
+                ['superadmin', 'admin', 'subadmin', 'reception'].includes(user.role)
+                ? <Summary /> 
+                : <StaffSummary />
+              ) : (
+                <div style={{ padding: '100px', textAlign: 'center', color: 'var(--primary)' }}>
+                  <div className="animate-pulse" style={{ fontSize: '1.2rem', fontWeight: '800' }}>INITIALIZING HMS PORTAL...</div>
+                  <div style={{ fontSize: '10px', marginTop: '10px', opacity: 0.5, letterSpacing: '2px' }}>ESTABLISHING SECURE ADMIN CHANNEL</div>
+                </div>
+              )
+            } />
+            
+            {/* Restricted Pages - Only SuperAdmin/SubAdmin */}
+            {['superadmin', 'subadmin'].includes(role) && (
+              <>
+                <Route path="users" element={<UserManagement />} />
+                <Route path="finance" element={<FinancialManagement />} />
+                <Route path="system" element={<SystemControl />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="tech-issues" element={<TechnicalIssues />} />
+                <Route path="queries" element={<Queries />} />
+              </>
+            )}
+
+            {/* Receptionist/Admin Pages */}
+            {['superadmin', 'subadmin', 'reception'].includes(role) && (
+              <>
+                <Route path="rooms" element={<Rooms />} />
+                <Route path="enroll" element={<Enrollment />} />
+                <Route path="bookings" element={<Bookings />} />
+                <Route path="customers" element={<CustomerDetails />} />
+                <Route path="housekeeping" element={<Housekeeping />} />
+                <Route path="services" element={<Services />} />
+                <Route path="staff" element={<Staff />} />
+                <Route path="tech-issues" element={<TechnicalIssues />} />
+                <Route path="system" element={<SystemControl />} />
+                <Route path="reports" element={<Reports />} />
+              </>
+            )}
+
+            {/* Staff Pages */}
+            <Route path="profile" element={<StaffSummary />} />
+            <Route path="tasks" element={<RoomServiceTasks />} />
+            <Route path="payouts" element={<StaffPayouts />} />
             <Route path="salary" element={<Attendance />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="customers" element={<CustomerDetails />} />
-            <Route path="housekeeping" element={<Housekeeping />} />
-            <Route path="services" element={<Services />} />
-            <Route path="staff" element={<Staff />} />
-            <Route path="inventory" element={<Inventory />} />
+            <Route path="tech-issues" element={<TechnicalIssues />} />
           </Routes>
         </main>
       </div>

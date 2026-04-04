@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Shield, ArrowLeft } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState('');
@@ -24,8 +25,10 @@ const VerifyOTP = () => {
     setError('');
     try {
       await verifyOTP(email, otp);
+      toast.success('Identity verified! Welcome to HMS Elite.');
       navigate('/dashboard');
     } catch (err) {
+      toast.error(err.response?.data?.msg || 'Invalid or expired OTP');
       setError(err.response?.data?.msg || 'Invalid or expired OTP');
     } finally {
       setLoading(false);

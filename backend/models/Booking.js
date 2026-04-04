@@ -20,10 +20,29 @@ const bookingSchema = new mongoose.Schema({
     {
       name: { type: String },
       price: { type: Number },
+      status: { type: String, enum: ['Pending', 'Delivered', 'Cancelled'], default: 'Pending' },
       isPaid: { type: Boolean, default: false }
     }
   ],
-  gstAmount: { type: Number },
+  alternatePhone: { type: String },
+  vehicleType: { type: String, enum: ['None', 'Bike', 'Car', 'Other'], default: 'None' },
+  vehicleNumber: { type: String },
+  guestCount: { type: Number, default: 1 },
+  additionalGuests: [
+    {
+      name: { type: String },
+      identityType: { type: String },
+      identityNumber: { type: String },
+      dob: { type: Date },
+      address: { type: String }
+    }
+  ],
+  isKids: { type: Boolean, default: false },
+  kidsAge: { type: Number },
+  isPets: { type: Boolean, default: false },
+  isKitchenAllowance: { type: Boolean, default: false },
+  hasGst: { type: Boolean, default: true },
+  gstRate: { type: Number, default: 12 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);

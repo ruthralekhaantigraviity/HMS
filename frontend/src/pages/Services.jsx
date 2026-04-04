@@ -11,6 +11,13 @@ const Services = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', price: '', category: 'Food', icon: 'Utensils', status: 'Active' });
+  const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   useEffect(() => {
     fetchServices();
@@ -44,22 +51,33 @@ const Services = () => {
       setShowModal(false);
       setFormData({ name: '', price: '', category: 'Food', icon: 'Utensils', status: 'Active' });
       fetchServices();
+      showToast(formData._id ? 'Service updated successfully!' : 'Service created successfully!');
     } catch (err) {
-      console.error(err);
+      showToast(err.response?.data?.msg || 'Error saving service', 'error');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/services/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        fetchServices();
-      } catch (err) {
-        console.error(err);
-      }
+  const confirmDeleteService = async () => {
+    const id = confirmModal.id;
+    setConfirmModal({ ...confirmModal, show: false });
+    try {
+      await axios.delete(`http://localhost:5000/api/services/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchServices();
+      showToast('Service removed from catalog!');
+    } catch (err) {
+      showToast(err.response?.data?.msg || 'Error deleting service', 'error');
     }
+  };
+
+  const handleDelete = (id) => {
+    setConfirmModal({
+      show: true,
+      id,
+      title: 'Remove Service',
+      message: 'Are you sure you want to remove this service from the catalog? Guests will no longer be able to request it.'
+    });
   };
 
   return (
@@ -149,6 +167,36 @@ const Services = () => {
               <button type="submit" className="btn btn-primary" style={{ marginTop: '12px' }}>Save Service Configuration</button>
             </form>
           </div>
+        </div>
+      )}
+      {/* Confirm Deletion Modal */}
+      {confirmModal.show && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
+          <div className="glass-card animate-scale-in" style={{ width: '400px', padding: '32px', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Trash2 size={32} />
+            </div>
+            <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>{confirmModal.title}</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>{confirmModal.message}</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', justifyContent: 'center' }}>Cancel</button>
+              <button onClick={confirmDeleteService} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', border: 'none', justifyContent: 'center', fontWeight: 800 }}>Confirm Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div style={{ 
+          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', 
+          background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)', 
+          color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, 
+          zIndex: 4000, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', display: 'flex', 
+          alignItems: 'center', gap: '10px' 
+        }}>
+          {toast.type === 'error' ? <X size={20} /> : <Zap size={20} />}
+          {toast.message}
         </div>
       )}
     </div>

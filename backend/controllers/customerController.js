@@ -5,14 +5,17 @@ const Customer = require('../models/Customer');
 exports.enrollCustomer = async (req, res) => {
   const { name, phone, email, identityType, identityNumber, identityImage, location } = req.body;
   try {
+    if (!name || !phone) {
+      return res.status(400).json({ msg: 'Incomplete Profile: Name and Phone are mandatory' });
+    }
+
     let customer = await Customer.findOne({ 
-      $or: [{ phone }, { identityNumber }] 
+      $or: [{ phone }, { identityNumber: identityNumber || 'NON_EXISTENT_ID' }] 
     });
 
     let alreadyExists = false;
     if (customer) {
       alreadyExists = true;
-      // If customer exists, update their details with the latest info
       customer.name = name || customer.name;
       customer.phone = phone || customer.phone;
       customer.email = email || customer.email;
@@ -31,7 +34,8 @@ exports.enrollCustomer = async (req, res) => {
     await customer.save();
     res.json(customer);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Customer Enrollment Error:', err);
+    res.status(500).json({ msg: `Database Error: ${err.message}` });
   }
 };
 
@@ -42,7 +46,8 @@ exports.getCustomers = async (req, res) => {
     const customers = await Customer.find().sort({ createdAt: -1 });
     res.json(customers);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Customer Fetch Error:', err);
+    res.status(500).json({ msg: 'Failed to retrieve customer records' });
   }
 };
 
@@ -51,10 +56,11 @@ exports.getCustomers = async (req, res) => {
 exports.searchByPhone = async (req, res) => {
   const { phone } = req.query;
   try {
+    if (!phone) return res.status(400).json({ msg: 'Phone number required for search' });
     const customer = await Customer.findOne({ phone });
-    if (!customer) return res.status(404).json({ msg: 'Customer not found' });
+    if (!customer) return res.status(404).json({ msg: 'No existing record found for this number' });
     res.json(customer);
   } catch (err) {
-    res.status(500).send('Server Error');
+    res.status(500).json({ msg: 'Network Error: Customer lookup failed' });
   }
 };

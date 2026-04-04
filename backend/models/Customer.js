@@ -8,6 +8,7 @@ const customerSchema = new mongoose.Schema({
   identityNumber: { type: String },
   identityImage: { type: String }, // Base64
   location: { type: String },
+  alternatePhone: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Customer', customerSchema);

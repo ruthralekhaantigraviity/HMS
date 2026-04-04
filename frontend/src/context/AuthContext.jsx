@@ -6,26 +6,42 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('hms_token'));
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('hms_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('hms_token'));
 
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Logic to fetch user profile could go here
-      const savedUser = JSON.parse(localStorage.getItem('hms_user'));
-      if (savedUser) setUser(savedUser);
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
     setLoading(false);
-  }, [token]);
+    console.log('AuthContext Ready: Token present:', !!token, 'Role:', user?.role);
+  }, [token, user]);
 
   const login = async (email, password) => {
     const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+    
+    // If token returned (Staff Bypass), set user/token now
+    if (res.data.token) {
+      const { token: newToken, user: userData } = res.data;
+      setToken(newToken);
+      setUser(userData);
+      localStorage.setItem('hms_token', newToken);
+      localStorage.setItem('hms_user', JSON.stringify(userData));
+    }
+    
     return res.data;
   };
+
 
   const verifyOTP = async (email, otp) => {
     const res = await axios.post('http://localhost:5000/api/auth/verify-otp', { email, otp });
@@ -39,14 +55,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    console.log('AuthContext: Logging out, clearing storage.');
     setToken(null);
     setUser(null);
     localStorage.removeItem('hms_token');
     localStorage.removeItem('hms_user');
   };
 
+  const debugReset = () => {
+    console.log('AuthContext: EMERGENCY RESET TRIGGERED.');
+    logout();
+    window.location.reload();
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, verifyOTP, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, verifyOTP, logout, debugReset }}>
       {children}
     </AuthContext.Provider>
   );

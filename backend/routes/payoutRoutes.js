@@ -9,4 +9,7 @@ router.get('/', protect, authorize('superadmin', 'subadmin'), payoutController.g
 // Release salary
 router.post('/release', protect, authorize('superadmin', 'subadmin'), payoutController.releaseSalary);
 
+// Get current user's payout history
+router.get('/me', protect, payoutController.getMyPayouts);
+
 module.exports = router;

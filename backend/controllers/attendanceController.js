@@ -57,3 +57,42 @@ exports.getAttendanceByDate = async (req, res) => {
     res.status(500).json({ msg: 'Error fetching attendance for this date' });
   }
 };
+// @route   GET api/attendance/me
+// @desc    Get current user's attendance for the current month
+exports.getMyAttendance = async (req, res) => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const records = await Attendance.find({
+      user: req.user.id,
+      date: { $gte: startOfMonth }
+    }).sort({ date: -1 });
+
+    res.json(records);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+};
+
+// @route   POST api/attendance/mark-me
+// @desc    Employee marks their own attendance for today
+exports.markMyAttendance = async (req, res) => {
+  const { status } = req.body; // Usually 'Present'
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  try {
+    const attendance = await Attendance.findOneAndUpdate(
+      { user: req.user.id, date: today },
+      { status: status || 'Present' },
+      { new: true, upsert: true }
+    );
+    res.json(attendance);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+};

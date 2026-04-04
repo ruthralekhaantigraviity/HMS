@@ -10,7 +10,10 @@ const HotelManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [updatingPrices, setUpdatingPrices] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const showToast = (message, type = 'success') => {
@@ -49,33 +52,68 @@ const HotelManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEditRoom = (room) => {
+    setFormData({
+      roomNumber: room.roomNumber,
+      floor: room.floor,
+      type: room.type,
+      category: room.category,
+      price: room.price,
+      description: room.description || ''
+    });
+    setSelectedRoomId(room._id);
+    setIsEditing(true);
+    setShowAddModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCreating(true);
     try {
-      await axios.post('http://localhost:5000/api/rooms', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (isEditing) {
+        await axios.put(`http://localhost:5000/api/rooms/${selectedRoomId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('Room updated successfully!');
+      } else {
+        await axios.post('http://localhost:5000/api/rooms', formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('Room added successfully!');
+      }
       setShowAddModal(false);
+      setIsEditing(false);
+      setSelectedRoomId(null);
       setFormData({ roomNumber: '', floor: '', type: 'Single', category: 'AC', price: '', description: '' });
       fetchRooms();
     } catch (err) {
-      showToast(err.response?.data?.msg || 'Error adding room', 'error');
+      showToast(err.response?.data?.msg || 'Error processing request', 'error');
     } finally {
       setCreating(false);
     }
   };
 
-  const deleteRoom = async (id) => {
-    if (!window.confirm('Delete this room?')) return;
+  const confirmDeleteRoom = async () => {
+    const id = confirmModal.id;
+    setConfirmModal({ ...confirmModal, show: false });
     try {
       await axios.delete(`http://localhost:5000/api/rooms/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRooms();
+      showToast('Room deleted successfully!');
     } catch (err) {
-      console.error(err);
+      showToast(err.response?.data?.msg || 'Error deleting room', 'error');
     }
+  };
+
+  const deleteRoom = (id) => {
+    setConfirmModal({
+      show: true,
+      id,
+      title: 'Delete Room',
+      message: 'Are you sure you want to remove this room from the inventory? This cannot be undone.'
+    });
   };
 
   const updateRoomPrice = async (roomId, newPrice) => {
@@ -106,6 +144,7 @@ const HotelManagement = () => {
 
   const acCount = rooms.filter(r => r.category === 'AC').length;
   const nonAcCount = rooms.filter(r => r.category === 'NON-AC').length;
+  const cleaningCount = rooms.filter(r => r.status === 'Cleaning').length;
   const maintenanceCount = rooms.filter(r => r.status === 'Maintenance').length;
 
   return (
@@ -121,8 +160,8 @@ const HotelManagement = () => {
           </button>
           <button 
             className="btn" 
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white', borderRadius: '0' }}
-            onClick={() => setShowAddModal(true)}
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '0' }}
+            onClick={() => { setIsEditing(false); setShowAddModal(true); }}
           >
             <Plus size={18} /> Add Room
           </button>
@@ -152,9 +191,13 @@ const HotelManagement = () => {
             <span>Total Operational</span>
             <span style={{ fontWeight: 700, color: 'var(--success)' }}>{rooms.length - maintenanceCount} Rooms</span>
           </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+            <span>Cleaning / Tidy</span>
+            <span style={{ fontWeight: 700, color: '#3b82f6' }}>{cleaningCount} Rooms</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
             <span>Maintenance</span>
-            <span style={{ fontWeight: 700, color: 'var(--danger)' }}>{maintenanceCount} Rooms</span>
+            <span style={{ fontWeight: 700, color: '#9ca3af' }}>{maintenanceCount} Rooms</span>
           </div>
         </div>
 
@@ -205,12 +248,18 @@ const HotelManagement = () => {
                   </td>
                   <td style={{ padding: '20px 24px', fontWeight: 600 }}>${room.price}</td>
                   <td style={{ padding: '20px 24px' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: '20px', border: `1px solid ${room.status === 'Available' ? 'var(--success)' : 'var(--danger)'}`, color: room.status === 'Available' ? 'var(--success)' : 'var(--danger)', fontSize: '12px' }}>
+                    <span style={{ 
+                      padding: '4px 10px', 
+                      borderRadius: '20px', 
+                      border: `1px solid ${room.status === 'Available' ? 'var(--success)' : room.status === 'Cleaning' ? '#3b82f6' : '#9ca3af'}`, 
+                      color: room.status === 'Available' ? 'var(--success)' : room.status === 'Cleaning' ? '#3b82f6' : '#9ca3af', 
+                      fontSize: '12px' 
+                    }}>
                       {room.status}
                     </span>
                   </td>
                   <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                    <button style={{ background: 'none', color: 'var(--text-muted)' }}><Edit3 size={16} /></button>
+                    <button onClick={() => handleEditRoom(room)} style={{ background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><Edit3 size={16} /></button>
                     <button onClick={() => deleteRoom(room._id)} style={{ background: 'none', color: 'var(--danger)', marginLeft: '8px' }}><Trash2 size={16} /></button>
                   </td>
                 </tr>
@@ -290,7 +339,7 @@ const HotelManagement = () => {
             </div>
 
             <div style={{ borderTop: '1px solid var(--border)', marginTop: '24px', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-               <button className="btn" style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 0 }} onClick={() => setShowPricingModal(false)}>Close Setup</button>
+               <button className="btn" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: 0 }} onClick={() => setShowPricingModal(false)}>Close Setup</button>
             </div>
           </div>
         </div>
@@ -300,7 +349,7 @@ const HotelManagement = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <form onSubmit={handleSubmit} className="glass-card" style={{ width: '500px', padding: '32px', borderRadius: '0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2>Add New Room</h2>
+              <h2>{isEditing ? 'Edit Room Details' : 'Add New Room'}</h2>
               <button type="button" onClick={() => setShowAddModal(false)} style={{ background: 'none', color: 'var(--text-muted)' }}><X /></button>
             </div>
             
@@ -318,7 +367,7 @@ const HotelManagement = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="input-group">
                 <label>Room Type</label>
-                <select name="type" value={formData.type} onChange={handleChange} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '0', color: 'white' }}>
+                <select name="type" value={formData.type} onChange={handleChange} style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0', color: 'var(--text-main)' }}>
                   <option value="Single">Single</option>
                   <option value="Double">Double</option>
                   <option value="Suite">Suite</option>
@@ -327,7 +376,7 @@ const HotelManagement = () => {
               </div>
               <div className="input-group">
                 <label>Category</label>
-                <select name="category" value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '0', color: 'white' }}>
+                <select name="category" value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0', color: 'var(--text-main)' }}>
                   <option value="AC">AC</option>
                   <option value="NON-AC">NON-AC</option>
                 </select>
@@ -340,9 +389,9 @@ const HotelManagement = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-              <button type="button" onClick={() => setShowAddModal(false)} className="btn" style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: 0 }}>Cancel</button>
+              <button type="button" onClick={() => setShowAddModal(false)} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: 0 }}>Cancel</button>
               <button type="submit" disabled={creating} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', borderRadius: 0 }}>
-                {creating ? <Loader2 className="animate-spin" size={18} /> : 'Create Room'}
+                {creating ? <Loader2 className="animate-spin" size={18} /> : (isEditing ? 'Update Room' : 'Create Room')}
               </button>
             </div>
           </form>
@@ -378,6 +427,22 @@ const HotelManagement = () => {
           `}</style>
           {toast.type === 'success' ? <CheckCircle size={20} /> : <Settings size={20} />}
           {toast.message}
+        </div>
+      )}
+      {/* Confirm Deletion Modal */}
+      {confirmModal.show && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
+          <div className="glass-card animate-scale-in" style={{ width: '400px', padding: '32px', textAlign: 'center', borderRadius: '0' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Trash2 size={32} />
+            </div>
+            <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>{confirmModal.title}</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>{confirmModal.message}</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', justifyContent: 'center', borderRadius: '0' }}>Cancel</button>
+              <button onClick={confirmDeleteRoom} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', border: 'none', justifyContent: 'center', fontWeight: 800, borderRadius: '0' }}>Confirm Delete</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

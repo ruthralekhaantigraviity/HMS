@@ -9,89 +9,110 @@ import { useAuth } from '../context/AuthContext';
 const StaffDetailModal = ({ staff, onClose }) => {
   if (!staff) return null;
 
+  const DetailRow = ({ icon: Icon, label, value, color = "var(--primary)" }) => (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '12px', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+      <div style={{ padding: '8px', background: `${color}10`, color: color, borderRadius: '8px', flexShrink: 0 }}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</p>
+        <p style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '14px' }}>{value || 'Not Provided'}</p>
+      </div>
+    </div>
+  );
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
-      <div className="glass-card animate-fade-in" style={{ maxWidth: '600px', width: '100%', padding: '0', overflow: 'hidden' }}>
-        <div style={{ padding: '32px', background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, transparent 100%)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ width: '64px', height: '64px', background: 'var(--primary)', color: 'var(--bg-dark)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
+      <div className="glass-card animate-fade-in" style={{ maxWidth: '750px', width: '100%', padding: '0', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+        {/* Modal Header */}
+        <div style={{ padding: '40px', background: 'linear-gradient(135deg, var(--primary) 0%, #b8860b 100%)', position: 'relative' }}>
+          <button 
+            onClick={onClose} 
+            style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(0,0,0,0.2)', color: 'white', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex' }}
+          >
+            <X size={20} />
+          </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+            <div style={{ 
+              width: '100px', 
+              height: '100px', 
+              background: 'white', 
+              color: 'var(--primary)', 
+              borderRadius: '24px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontWeight: '800', 
+              fontSize: '2.5rem',
+              boxShadow: '0 10px 20px rgba(0,0,0,0.2)',
+              fontFamily: 'Outfit'
+            }}>
               {staff.name.charAt(0)}
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{staff.name}</h2>
-              <span style={{ padding: '4px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', fontSize: '12px', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>{staff.role}</span>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: 'none', color: 'var(--text-muted)', border: 'none', cursor: 'pointer' }}><X size={28} /></button>
-        </div>
-
-        <div style={{ padding: '32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-          {/* Identity Section */}
-          <div>
-            <h4 style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>Identity Details</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <CreditCard size={18} color="var(--primary)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Aadhar Card No.</p>
-                  <p style={{ fontWeight: 600 }}>{staff.aadhar || 'Not Provided'}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <CreditCard size={18} color="var(--primary)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>PAN Card No.</p>
-                  <p style={{ fontWeight: 600 }}>{staff.pan || 'Not Provided'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Section */}
-          <div>
-            <h4 style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>Contact Information</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Phone size={18} color="var(--success)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Phone Number</p>
-                  <p style={{ fontWeight: 600 }}>{staff.phone || 'Not Provided'}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Mail size={18} color="var(--primary)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Email Address</p>
-                  <p style={{ fontWeight: 600 }}>{staff.email}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Misc Section */}
-          <div style={{ gridColumn: '1 / -1' }}>
-            <h4 style={{ color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>Location & Employment</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <MapPin size={18} color="var(--danger)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Current Address</p>
-                  <p style={{ fontWeight: 600 }}>{staff.location || 'Not Provided'}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <Calendar size={18} color="var(--primary)" />
-                <div>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Joining Date</p>
-                  <p style={{ fontWeight: 600 }}>{new Date(staff.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
+            <div style={{ color: 'white' }}>
+              <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.2)', padding: '4px 14px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, marginBottom: '12px', display: 'inline-block' }}>{staff.role}</span>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 800, fontFamily: 'Outfit', letterSpacing: '-0.5px' }}>{staff.name}</h2>
+              <p style={{ opacity: 0.8, fontSize: '15px' }}>Employee ID: #STF-{staff._id.slice(-6).toUpperCase()}</p>
             </div>
           </div>
         </div>
 
-        <div style={{ padding: '24px 32px', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--border)', textAlign: 'right' }}>
-           <button onClick={onClose} className="btn btn-primary" style={{ padding: '12px 32px' }}>Close Profile</button>
+        {/* Modal Body */}
+        <div style={{ padding: '40px', background: 'var(--bg-main)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            
+            {/* Left Column: Personal & Identity */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div>
+                <h4 style={{ color: 'var(--primary)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1.5px', fontWeight: 800 }}>Identity Verification</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <DetailRow icon={CreditCard} label="Aadhar Card" value={staff.aadhar} />
+                  <DetailRow icon={CreditCard} label="PAN Card" value={staff.pan} />
+                </div>
+              </div>
+
+              <div>
+                <h4 style={{ color: 'var(--primary)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1.5px', fontWeight: 800 }}>Location Details</h4>
+                <DetailRow icon={MapPin} label="Current Address" value={staff.location} color="var(--danger)" />
+              </div>
+            </div>
+
+            {/* Right Column: Contact & Work */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div>
+                <h4 style={{ color: 'var(--primary)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1.5px', fontWeight: 800 }}>Communication</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <DetailRow icon={Phone} label="Official Contact" value={staff.phone} color="var(--success)" />
+                  <DetailRow icon={Mail} label="Email Address" value={staff.email} />
+                </div>
+              </div>
+
+              <div>
+                <h4 style={{ color: 'var(--primary)', fontSize: '12px', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1.5px', fontWeight: 800 }}>Employment History</h4>
+                <DetailRow icon={Calendar} label="Joining Date" value={new Date(staff.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} />
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div style={{ padding: '24px 40px', background: 'var(--surface)', borderTop: '1px solid var(--border)', textAlign: 'right' }}>
+           <button 
+             onClick={onClose} 
+             className="btn btn-primary" 
+             style={{ 
+               padding: '14px 40px', 
+               borderRadius: '12px', 
+               fontSize: '14px', 
+               fontWeight: 700, 
+               boxShadow: 'var(--shadow-md)',
+               fontFamily: 'Outfit'
+             }}
+           >
+             Dismiss Details
+           </button>
         </div>
       </div>
     </div>
@@ -122,20 +143,16 @@ const StaffCard = ({ staff, icon: Icon, color, onView }) => (
       <div style={{ textAlign: 'right' }}>
         <button 
           onClick={onView}
+          className="view-details-btn"
           style={{ 
-            background: 'rgba(255,255,255,0.05)', 
-            color: 'var(--primary)', 
-            border: '1px solid var(--primary)', 
-            padding: '8px 16px', 
-            borderRadius: '8px', 
+            padding: '10px 20px', 
             fontSize: '12px', 
-            fontWeight: 600,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            transition: '0.2s'
+            fontWeight: 700,
+            fontFamily: 'Outfit',
+            width: 'auto'
           }}
         >
-          View more details
+          View Profile
         </button>
       </div>
     </div>
@@ -172,7 +189,7 @@ const Staff = () => {
       case 'superadmin': return { icon: Shield, color: 'var(--danger)' };
       case 'subadmin': return { icon: Shield, color: 'var(--primary)' };
       case 'reception': return { icon: UserCheck, color: 'var(--success)' };
-      case 'housekeeping': return { icon: Brush, color: '#38bdf8' };
+      case 'housekeeping': return { icon: Brush, color: 'var(--accent)' };
       case 'roomservice': return { icon: Coffee, color: 'var(--accent)' };
       default: return { icon: UserCheck, color: 'var(--text-muted)' };
     }
@@ -205,7 +222,7 @@ const Staff = () => {
             placeholder="Search staff..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ padding: '12px 12px 12px 40px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'white', width: '280px' }} 
+            style={{ padding: '12px 12px 12px 40px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)', width: '280px' }} 
           />
         </div>
       </div>
