@@ -9,7 +9,7 @@ import {
   Brush, Coffee, Clock, Utensils, MessageSquare,
   Sun, Moon, AlertCircle, Globe
 } from 'lucide-react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import Summary from './Summary';
 import Rooms from './Rooms';
 import Bookings from './Bookings';
@@ -357,6 +357,8 @@ const Dashboard = () => {
             <Route path="payouts" element={<StaffPayouts />} />
             <Route path="salary" element={<Attendance />} />
             <Route path="tech-issues" element={<TechnicalIssues />} />
+            {/* Catch-all Redirect */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>

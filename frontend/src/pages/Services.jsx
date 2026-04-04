@@ -115,7 +115,7 @@ const Services = () => {
                 </div>
                 
                 <div style={{ marginTop: '20px', display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-                  <button onClick={() => { setFormData(service); setShowModal(true); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '8px', color: 'white', fontSize: '13px', cursor: 'pointer' }}>
+                  <button onClick={() => { setFormData(service); setShowModal(true); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '13px', cursor: 'pointer' }}>
                     <Edit2 size={14} /> Edit
                   </button>
                   <button onClick={() => handleDelete(service._id)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', color: 'var(--danger)', fontSize: '13px', cursor: 'pointer' }}>
@@ -146,7 +146,7 @@ const Services = () => {
               </div>
               <div className="input-group">
                 <label>Category</label>
-                <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'white' }}>
+                <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}>
                   <option value="Food">Food & Dining</option>
                   <option value="Comfort">Comfort & Stay</option>
                   <option value="Tech">Technology</option>
@@ -156,7 +156,7 @@ const Services = () => {
               </div>
               <div className="input-group">
                 <label>Icon Identifier</label>
-                <select value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'white' }}>
+                <select value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}>
                   <option value="Utensils">Food Icon</option>
                   <option value="Zap">Zap Icon</option>
                   <option value="Coffee">Coffee Icon</option>

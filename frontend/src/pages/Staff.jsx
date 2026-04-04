@@ -28,7 +28,7 @@ const StaffDetailModal = ({ staff, onClose }) => {
         <div style={{ padding: '40px', background: 'linear-gradient(135deg, var(--primary) 0%, #b8860b 100%)', position: 'relative' }}>
           <button 
             onClick={onClose} 
-            style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(0,0,0,0.2)', color: 'white', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex' }}
+            style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(0,0,0,0.4)', color: 'white', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex' }}
           >
             <X size={20} />
           </button>

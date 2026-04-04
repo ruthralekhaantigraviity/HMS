@@ -119,13 +119,13 @@ const Attendance = () => {
               onClick={(e) => e.stopPropagation()}
               style={{ 
                 background: 'transparent', 
-                color: 'white', 
+                color: 'var(--text-main)', 
                 border: 'none', 
                 fontSize: '14px',
                 outline: 'none',
                 cursor: 'pointer',
                 fontFamily: 'inherit',
-                colorScheme: 'dark'
+                colorScheme: 'light dark'
               }}
             />
           </div>
@@ -203,7 +203,7 @@ const Attendance = () => {
                     <td style={{ padding: '16px 24px', color: 'var(--text-muted)', fontSize: '13px' }}>
                       {new Date(selectedDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td style={{ padding: '16px 24px', fontWeight: 600, color: 'white' }}>{s.name}</td>
+                    <td style={{ padding: '16px 24px', fontWeight: 600, color: 'var(--text-main)' }}>{s.name}</td>
                     <td style={{ padding: '16px 24px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{s.role}</td>
                      <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                        <span style={{ 
@@ -242,7 +242,7 @@ const Attendance = () => {
               {staff.map(s => (
                 <tr key={s._id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontWeight: 600, color: 'white' }}>{s.name}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{s.name}</div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{s.role}</div>
                   </td>
                   <td style={{ padding: '16px 24px', fontWeight: 700 }}>₹{s.salary || 15000}</td>
@@ -278,7 +278,7 @@ const Attendance = () => {
                 <tr><td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No payout records found.</td></tr>
               ) : history.map(h => (
                 <tr key={h._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '16px 24px', fontWeight: 600, color: 'white' }}>{h.user?.name}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 600, color: 'var(--text-main)' }}>{h.user?.name}</td>
                   <td style={{ padding: '16px 24px', color: 'var(--text-muted)' }}>{h.month}</td>
                   <td style={{ padding: '16px 24px', fontWeight: 'bold' }}>₹{h.amount}</td>
                   <td style={{ padding: '16px 24px' }}><span style={{ color: 'var(--success)', fontWeight: 700 }}>● PAID</span></td>
