@@ -202,7 +202,6 @@ const Dashboard = () => {
               <BedDouble size={24} />
             </div>
             <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz</h2>
-            <span style={{ fontSize: '10px', background: 'var(--primary)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontWeight: 900 }}>v2.2.0</span>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {menu.map((item, idx) => (
@@ -394,21 +393,6 @@ const Dashboard = () => {
 
         {/* Dynamic Pages */}
         <main style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
-          {/* LOUD DEBUG BANNER */}
-          <div style={{ 
-            background: '#ff0000', 
-            color: 'white', 
-            padding: '24px', 
-            marginBottom: '32px', 
-            borderRadius: '16px', 
-            textAlign: 'center', 
-            boxShadow: '0 10px 30px rgba(255,0,0,0.5)', 
-            border: '5px solid yellow',
-            animation: 'pulse 1s infinite'
-          }}>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 10px 0' }}>⚠️ SYSTEM UPDATE APPLIED (v2.2.0) ⚠️</h1>
-            <p style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>PLEASE PERFORM A HARD REFRESH: PRESS <strong>CTRL + F5</strong> NOW!</p>
-          </div>
 
           <Routes>
             <Route index element={
