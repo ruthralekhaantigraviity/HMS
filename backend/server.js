@@ -43,7 +43,7 @@ const issueRoutes = require('./routes/issueRoutes');
 app.use('/api/issues', issueRoutes);
 
 // Start Server
-if (process.env.NODE_ENV !== 'test') {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
