@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Search, User, Phone, Mail, IdCard, Loader2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -22,9 +22,7 @@ const CustomerDetails = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get('/api/bookings/customers', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/bookings/customers');
         setCustomers(res.data);
       } catch (err) {
         console.error('Error fetching customers:', err);

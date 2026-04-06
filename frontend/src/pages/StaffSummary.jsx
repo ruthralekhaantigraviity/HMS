@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, User, Clock, Wallet, Calendar, AlertCircle } from 'lucide-react';
 
@@ -16,9 +16,9 @@ const StaffSummary = () => {
     const fetchData = async () => {
       try {
         const [aRes, pRes, iRes] = await Promise.all([
-          axios.get('/api/attendance/me', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/payouts/me', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/issues', { headers: { Authorization: `Bearer ${token}` } })
+          axios.get('/api/attendance/me'),
+          axios.get('/api/payouts/me'),
+          axios.get('/api/issues')
         ]);
         setAttendance(Array.isArray(aRes.data) ? aRes.data : []);
         setPayouts(Array.isArray(pRes.data) ? pRes.data : []);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { BedDouble, Plus, Edit3, Settings, DollarSign, Wrench, Loader2, X, Trash2, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -34,9 +34,7 @@ const HotelManagement = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/rooms', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/rooms');
       setRooms(res.data);
     } catch (err) {
       console.error('Error fetching rooms:', err);
@@ -79,14 +77,10 @@ const HotelManagement = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`/api/rooms/${selectedRoomId}`, submissionData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(`/api/rooms/${selectedRoomId}`, submissionData);
         toast.success('Room configuration updated successfully');
       } else {
-        await axios.post('/api/rooms', submissionData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.post('/api/rooms', submissionData);
         toast.success(`Room ${submissionData.roomNumber} registered successfully`);
       }
       setShowAddModal(false);
@@ -107,9 +101,7 @@ const HotelManagement = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`/api/rooms/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/rooms/${id}`);
       fetchRooms();
       toast.success('Room deleted successfully!');
     } catch (err) {
@@ -128,9 +120,7 @@ const HotelManagement = () => {
 
   const updateRoomPrice = async (roomId, newPrice) => {
     try {
-      await axios.put(`/api/rooms/${roomId}`, { price: newPrice }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`/api/rooms/${roomId}`, { price: newPrice });
     } catch (err) {
       console.error('Error updating price:', err);
     }

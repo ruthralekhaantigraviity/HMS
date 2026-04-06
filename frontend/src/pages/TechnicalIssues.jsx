@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { 
   AlertCircle, Plus, Filter, CheckCircle, Clock, 
@@ -17,9 +17,7 @@ const TechnicalIssues = () => {
 
   const fetchIssues = async () => {
     try {
-      const res = await axios.get('/api/issues', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/issues');
       setIssues(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch issues', err);
@@ -41,9 +39,7 @@ const TechnicalIssues = () => {
       description: issueData.description,
       category: 'IT',
       priority: 'High'
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    }, {});
 
     toast.promise(reportPromise, {
       loading: 'Sending report to Management...',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { MessageSquare, CheckCircle, Clock, Trash2, Loader2, Mail, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,9 +11,7 @@ const Queries = () => {
   const fetchQueries = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/queries', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/queries');
       setQueries(res.data);
     } catch (err) {
       console.error('Error fetching queries:', err);
@@ -28,9 +26,7 @@ const Queries = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.patch(`/api/queries/${id}`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.patch(`/api/queries/${id}`, { status });
       fetchQueries();
     } catch (err) {
       console.error('Error updating query status:', err);

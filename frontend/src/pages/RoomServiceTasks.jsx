@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Utensils, Clock, CheckCircle, AlertCircle, Loader2, MapPin, User, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,9 +17,7 @@ const RoomServiceTasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get('/api/bookings/services/pending', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/bookings/services/pending');
       setTasks(res.data);
     } catch (err) {
       console.error('Error fetching tasks:', err);
@@ -32,8 +30,7 @@ const RoomServiceTasks = () => {
     try {
       setUpdating(serviceId);
       await axios.patch(`/api/bookings/${bookingId}/services/${serviceId}`, 
-        { status: 'Delivered' },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { status: 'Delivered' }
       );
       setTasks(prev => prev.filter(t => t.serviceId !== serviceId));
     } catch (err) {

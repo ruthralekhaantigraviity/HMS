@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -67,12 +67,12 @@ const Summary = () => {
   const fetchStats = async () => {
     try {
       const results = await Promise.allSettled([
-        axios.get('/api/bookings/summary', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/rooms', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/attendance/today', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/bookings/active', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/services', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/bookings/summary'),
+        axios.get('/api/rooms'),
+        axios.get('/api/auth'),
+        axios.get('/api/attendance/today'),
+        axios.get('/api/bookings/active'),
+        axios.get('/api/services')
       ]);
       
       const getData = (idx, defaultVal = {}) => 
@@ -145,9 +145,7 @@ const Summary = () => {
         price: Number(price)
       };
       
-      await axios.post('/api/rooms', payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('/api/rooms', payload);
 
       setShowAddRoomModal(false);
       setNewRoomData({ roomNumber: '', floor: '', type: 'Double', category: 'AC', price: '' });
@@ -167,7 +165,7 @@ const Summary = () => {
     if (!issueData.description) return toast.error('Please enter description');
     try {
       setIsUpdating(true);
-      await axios.post('/api/issues', { ...issueData, category: 'Other', priority: 'Medium' }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/issues', { ...issueData, category: 'Other', priority: 'Medium' });
       setShowIssueModal(false);
       setIssueData({ description: '' });
       toast.success('Reported successfully to Management');
@@ -183,7 +181,7 @@ const Summary = () => {
       await axios.put(`/api/bookings/${bookingId}/add-service`, {
         name: service.name,
         price: service.price
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       fetchStats();
       setShowServiceModal(null);
     } catch (err) {
@@ -193,7 +191,7 @@ const Summary = () => {
 
   const handleExtendStay = async (bookingId, days) => {
     try {
-      await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days });
       fetchStats();
       setShowExtendModal(null);
     } catch (err) {
@@ -211,7 +209,7 @@ const Summary = () => {
         isPropertyDamaged: penaltyData.isPropertyDamaged,
         paymentMethod: billingData.method,
         finalSettlementAmount: billingData.amount || (checkoutBooking.totalAmount + (penaltyData.amount || 0))
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       fetchStats();
       setCheckoutStage('success');
     } catch (err) {
@@ -225,7 +223,7 @@ const Summary = () => {
     if (!confirmRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' });
       fetchStats();
       setConfirmRoom(null);
     } catch (err) {
@@ -304,7 +302,11 @@ const Summary = () => {
                   if (room.status === 'Available') navigate('/dashboard/enroll', { state: { roomNumber: room.roomNumber } });
                   else if (room.status === 'Cleaning' || room.status === 'Maintenance') setConfirmRoom(room);
                   else if (room.status === 'Occupied') {
-                    const booking = activeBookings.find(b => b.room?.roomNumber === room.roomNumber);
+                    const lookupRoom = (room.roomNumber || '').toString();
+                    const booking = activeBookings.find(b => 
+                      (b.room?.roomNumber?.toString() === lookupRoom) || 
+                      (b.room === room._id)
+                    );
                     setSelectedFacilities(booking || { room }); // Re-using state for quickview
                   }
                 }}
@@ -489,8 +491,8 @@ const Summary = () => {
                   <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.phone}</p>
                 </div>
                 <div>
-                  <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID (Aadhaar)</p>
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.aadhar || 'Not Provided'}</p>
+                  <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID ({selectedFacilities.customer.identityType || 'ID'})</p>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.identityNumber || 'Not Provided'}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Check-in Date</p>

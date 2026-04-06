@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Zap, Coffee, Utensils, Wifi, Loader2, IndianRupee, X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const iconMap = { Utensils, Zap, Coffee, Wifi, IndianRupee };
@@ -25,9 +25,7 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
-      const res = await axios.get('/api/services', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/services');
       setServices(res.data);
     } catch (err) {
       console.error(err);
@@ -40,13 +38,9 @@ const Services = () => {
     e.preventDefault();
     try {
       if (formData._id) {
-        await axios.put(`/api/services/${formData._id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(`/api/services/${formData._id}`, formData);
       } else {
-        await axios.post('/api/services', formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.post('/api/services', formData);
       }
       setShowModal(false);
       setFormData({ name: '', price: '', category: 'Food', icon: 'Utensils', status: 'Active' });
@@ -61,9 +55,7 @@ const Services = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`/api/services/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/services/${id}`);
       fetchServices();
       showToast('Service removed from catalog!');
     } catch (err) {

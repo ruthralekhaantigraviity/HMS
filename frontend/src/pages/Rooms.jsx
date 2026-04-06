@@ -82,9 +82,7 @@ const Rooms = () => {
         price: Number(price)
       };
 
-      await axios.post('/api/rooms', payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('/api/rooms', payload);
 
       toast.success('Room Registered Successfully!');
       setShowAddRoomModal(false);
@@ -145,8 +143,8 @@ const Rooms = () => {
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
             {loading ? 'Syncing...' : 'Refresh Status'}
           </button>
-          {['superadmin', 'subadmin'].includes(user?.role) && (
-            <button onClick={() => setShowAddModal(true)} className="btn-primary" style={{ padding: '12px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {['superadmin', 'admin', 'subadmin'].includes(user?.role?.toLowerCase()) && (
+            <button onClick={() => setShowAddRoomModal(true)} className="btn-primary" style={{ padding: '12px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Plus size={20} />
               <span>Register Room</span>
             </button>
@@ -220,12 +218,13 @@ const Rooms = () => {
                         else if (room.status === 'Cleaning' || room.status === 'Maintenance') setConfirmRoom(room);
                         else if (room.status === 'Occupied') {
                           // Standardize matching by checking both ID and roomNumber strings
+                          const lookupRoom = (room.roomNumber || '').toString();
                           const booking = activeBookings.find(b => 
                             (b.room?._id === room._id) || 
                             (String(b.room) === String(room._id)) ||
-                            (b.room?.roomNumber === room.roomNumber)
+                            (b.room?.roomNumber?.toString() === lookupRoom)
                           );
-                          setSelectedFacilities(booking || { room, isMissingData: true });
+                          setSelectedFacilities(booking || { room });
                         }
                       }}
                     >

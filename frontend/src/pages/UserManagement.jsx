@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { UserPlus, Search, Edit2, Trash2, Shield, UserCheck, Loader2, X, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const UserManagement = () => {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const [activeTab, setActiveTab] = useState('subadmins');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,9 +37,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/auth', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/auth');
       setUsers(res.data);
     } catch (err) {
       console.error('Error fetching users:', err);
@@ -79,9 +77,7 @@ const UserManagement = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`/api/auth/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/auth/${id}`);
       fetchUsers();
       showToast('User deleted successfully!');
     } catch (err) {
@@ -103,14 +99,10 @@ const UserManagement = () => {
     setCreating(true);
     try {
       if (isEditing) {
-        await axios.put(`/api/auth/${selectedUserId}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(`/api/auth/${selectedUserId}`, formData);
         showToast('User updated successfully!');
       } else {
-        await axios.post('/api/auth/register', formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.post('/api/auth/register', formData);
         showToast('User created successfully!');
       }
       setShowModal(false);
@@ -126,9 +118,10 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(u => {
-    if (activeTab === 'subadmins') return u.role === 'subadmin';
-    if (activeTab === 'reception') return u.role === 'reception';
-    if (activeTab === 'operations') return ['housekeeping', 'roomservice'].includes(u.role);
+    const r = u.role?.toLowerCase();
+    if (activeTab === 'subadmins') return r === 'subadmin';
+    if (activeTab === 'reception') return r === 'reception';
+    if (activeTab === 'operations') return ['housekeeping', 'roomservice'].includes(r);
     return false;
   });
 
@@ -145,7 +138,7 @@ const UserManagement = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', borderBottom: '1px solid var(--border)' }}>
-        {token && JSON.parse(atob(token.split('.')[1])).role === 'superadmin' && (
+        {['superadmin', 'admin'].includes(user?.role?.toLowerCase()) && (
           <button 
             onClick={() => setActiveTab('subadmins')}
             style={{ padding: '12px 24px', background: 'none', color: activeTab === 'subadmins' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'subadmins' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}

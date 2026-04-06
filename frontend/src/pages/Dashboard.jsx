@@ -130,8 +130,10 @@ const Dashboard = () => {
   }, [token, user?.role]); // Only re-run if role changes, to avoid loops
 
   const getMenuForRole = (role) => {
-    switch(role) {
+    const r = role.toLowerCase();
+    switch(r) {
       case 'superadmin':
+      case 'admin':
       case 'subadmin':
         return [
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -177,7 +179,20 @@ const Dashboard = () => {
     }
   };
 
-  const role = user?.role || 'unknown';
+  const rawRole = user?.role;
+  
+  if (!user || !rawRole) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', color: 'var(--primary)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="animate-pulse" style={{ fontSize: '1.2rem', fontWeight: 800 }}>INITIALIZING SECURE SESSION...</div>
+          <div style={{ fontSize: '10px', marginTop: '10px', opacity: 0.5, letterSpacing: '2px' }}>ESTABLISHING ENCRYPTED ADMIN CHANNEL</div>
+        </div>
+      </div>
+    );
+  }
+
+  const role = rawRole.toLowerCase();
   const menu = getMenuForRole(role);
 
   return (
@@ -397,7 +412,7 @@ const Dashboard = () => {
           <Routes>
             <Route index element={
               user ? (
-                ['superadmin', 'admin', 'subadmin', 'reception'].includes(user.role)
+                ['superadmin', 'admin', 'subadmin', 'reception'].includes(role)
                 ? <Summary /> 
                 : <StaffSummary />
               ) : (
@@ -408,22 +423,19 @@ const Dashboard = () => {
               )
             } />
             
-            {/* Restricted Pages - Only SuperAdmin/SubAdmin */}
-            {['superadmin', 'subadmin'].includes(role) && (
+            {/* Management & Administration (SuperAdmin, Admin, SubAdmin) */}
+            {['superadmin', 'admin', 'subadmin'].includes(role) && (
               <>
                 <Route path="users" element={<UserManagement />} />
                 <Route path="finance" element={<FinancialManagement />} />
-                <Route path="system" element={<SystemControl />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="inventory" element={<Inventory />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="tech-issues" element={<TechnicalIssues />} />
                 <Route path="queries" element={<Queries />} />
               </>
             )}
 
-            {/* Receptionist/Admin Pages */}
-            {['superadmin', 'subadmin', 'reception'].includes(role) && (
+            {/* Operations (All Admin levels + Reception) */}
+            {['superadmin', 'admin', 'subadmin', 'reception'].includes(role) && (
               <>
                 <Route path="rooms" element={<Rooms />} />
                 <Route path="enroll" element={<Enrollment />} />
@@ -432,18 +444,19 @@ const Dashboard = () => {
                 <Route path="housekeeping" element={<Housekeeping />} />
                 <Route path="services" element={<Services />} />
                 <Route path="staff" element={<Staff />} />
-                <Route path="tech-issues" element={<TechnicalIssues />} />
-                <Route path="system" element={<SystemControl />} />
+                <Route path="salary" element={<Attendance />} />
                 <Route path="reports" element={<Reports />} />
+                <Route path="system" element={<SystemControl />} />
+                <Route path="admin" element={<HotelManagement />} />
               </>
             )}
 
-            {/* Staff Pages */}
+            {/* General & Shared Pages */}
             <Route path="profile" element={<StaffSummary />} />
             <Route path="tasks" element={<RoomServiceTasks />} />
             <Route path="payouts" element={<StaffPayouts />} />
-            <Route path="salary" element={<Attendance />} />
             <Route path="tech-issues" element={<TechnicalIssues />} />
+
             {/* Catch-all Redirect */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

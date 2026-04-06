@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Send, User, MessageSquare, Shield, Loader2, Search, CheckCircle, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -36,9 +36,7 @@ const ChatHub = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get('/api/messages/contacts', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/messages/contacts');
       setContacts(res.data);
     } catch (err) {
       console.error('Error fetching contacts:', err);
@@ -49,9 +47,7 @@ const ChatHub = () => {
 
   const fetchMessages = async (contactId) => {
     try {
-      const res = await axios.get(`/api/messages/${contactId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get(`/api/messages/${contactId}`);
       setMessages(res.data);
     } catch (err) {
       console.error('Error fetching messages:', err);
@@ -67,8 +63,6 @@ const ChatHub = () => {
       const res = await axios.post('/api/messages', {
         receiverId: selectedContact._id,
         content: newMessage
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       setMessages([...messages, res.data]);
       setNewMessage('');

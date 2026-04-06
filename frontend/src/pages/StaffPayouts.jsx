@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { IndianRupee, CheckCircle, Loader2, Calendar, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,9 +12,7 @@ const StaffPayouts = () => {
   useEffect(() => {
     const fetchPayouts = async () => {
       try {
-        const res = await axios.get('/api/payouts/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/payouts/me');
         setPayouts(res.data);
       } catch (err) {
         console.error('Error fetching payouts:', err);

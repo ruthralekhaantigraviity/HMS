@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import VerifyOTP from './pages/VerifyOTP';
+import LandingPage from './pages/LandingPage';
 
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
@@ -67,8 +68,8 @@ function App() {
         }}
       />
       <Routes>
-        {/* Default to Dashboard (which will prompt for login if needed) */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        {/* Main Landing Page */}
+        <Route path="/" element={<LandingPage />} />
         
         <Route path="/login" element={
           <PublicRoute>

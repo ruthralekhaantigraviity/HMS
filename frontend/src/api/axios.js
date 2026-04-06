@@ -4,9 +4,11 @@ const instance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
 });
 
+console.log('Axios Initialized with baseURL:', instance.defaults.baseURL);
+
 // Add a request interceptor to include the token if it exists
 instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('hms_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

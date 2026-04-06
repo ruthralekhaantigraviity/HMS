@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ClipboardList, Plus, Search, AlertCircle, CheckCircle, Package, RefreshCw, X, Settings, DollarSign, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const Inventory = () => {
@@ -20,9 +20,7 @@ const Inventory = () => {
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/inventory', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/inventory');
       setItems(res.data);
     } catch (err) {
       console.error(err);
@@ -45,9 +43,7 @@ const Inventory = () => {
         stock: Number(formData.stock),
         minStock: Number(formData.minStock)
       };
-      await axios.post('/api/inventory', payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('/api/inventory', payload);
       setShowAddModal(false);
       setFormData({ name: '', category: 'Linen', stock: '', minStock: '10', unit: 'pcs' });
       fetchItems();
@@ -63,9 +59,7 @@ const Inventory = () => {
     try {
       const item = items.find(i => i._id === itemId);
       const newStock = Math.max(0, item.stock + amount);
-      const res = await axios.put(`/api/inventory/${itemId}`, { stock: newStock }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.put(`/api/inventory/${itemId}`, { stock: newStock });
       setItems(prev => prev.map(i => i._id === itemId ? res.data : i));
       showToast('Stock Adjusted Successfully');
     } catch (err) {

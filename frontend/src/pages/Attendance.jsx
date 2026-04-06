@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { UserCheck, UserX, Clock, Calendar, DollarSign, Save, Loader2, Send, CheckCircle, Receipt, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,9 +20,9 @@ const Attendance = () => {
     try {
       setLoading(true);
       const [staffRes, historyRes, attRes] = await Promise.all([
-        axios.get('/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('/api/payouts', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`/api/attendance/date/${selectedDate}`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/auth'),
+        axios.get('/api/payouts'),
+        axios.get(`/api/attendance/date/${selectedDate}`)
       ]);
       
       setStaff(staffRes.data.filter(u => u.role !== 'superadmin')); 
@@ -57,8 +57,7 @@ const Attendance = () => {
   const handleMarkAttendance = async (userId, status) => {
     try {
       await axios.post('/api/attendance', 
-        { userId, status }, 
-        { headers: { Authorization: `Bearer ${token}` } }
+        { userId, status }
       );
       setAttendance(prev => ({ ...prev, [userId]: status }));
     } catch (err) {
@@ -75,7 +74,7 @@ const Attendance = () => {
         userId: selectedStaff._id,
         amount: selectedStaff.salary || 1500, // Fallback for demo
         month
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       
       setSelectedStaff(null);
       fetchData();

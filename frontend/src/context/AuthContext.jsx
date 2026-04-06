@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -19,12 +19,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
-
     // Add interceptor for 401 errors
     const interceptor = axios.interceptors.response.use(
       (response) => response,

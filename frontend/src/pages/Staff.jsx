@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { 
   Search, Mail, UserCheck, Shield, Brush, Coffee, 
   Loader2, Phone, MapPin, CreditCard, X, Calendar
@@ -171,9 +171,7 @@ const Staff = () => {
     const fetchStaff = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('/api/auth', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/auth');
         setUsers(res.data);
       } catch (err) {
         console.error('Error fetching staff:', err);

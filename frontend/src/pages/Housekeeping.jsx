@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { Brush, CheckCircle, Clock, AlertTriangle, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,9 +15,7 @@ const Housekeeping = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/rooms', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/rooms');
       setRooms(res.data);
     } catch (err) {
       console.error('Error fetching rooms:', err);
@@ -28,9 +26,7 @@ const Housekeeping = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`/api/rooms/${id}`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`/api/rooms/${id}`, { status });
       fetchRooms();
     } catch (err) {
       console.error(err);

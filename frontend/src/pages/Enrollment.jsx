@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { UserPlus, UserCheck, CheckCircle, Search, CreditCard, BedDouble, Plus, Minus, Coffee, Droplets, Clock, Utensils, Zap, Wifi, IndianRupee, X, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -169,10 +169,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
   const handlePhoneLookup = async (phone) => {
     if (phone.length >= 10) {
       try {
-        const token = localStorage.getItem('hms_token');
-        const res = await axios.get(`/api/bookings/customers/search?phone=${phone}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get(`/api/bookings/customers/search?phone=${phone}`);
         if (res.data) {
           setFormData(prev => ({ 
             ...prev, 
@@ -237,8 +234,6 @@ const Enrollment = ({ isModal = false, onClose }) => {
         name: formData.name, phone: formData.phone, email: formData.email,
         identityType: formData.identityType, identityNumber: formData.identityNumber,
         identityImage: formData.identityImage, location: formData.location
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       // Create Booking
@@ -265,8 +260,6 @@ const Enrollment = ({ isModal = false, onClose }) => {
         bookingType: formData.bookingType,
         referrerName: formData.referrerName,
         manualPrice: formData.manualPrice
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       const isExisting = custRes.data.alreadyExists;

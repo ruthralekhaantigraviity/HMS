@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -33,23 +33,18 @@ const Bookings = () => {
     try {
       setLoading(true);
       // Fetch Active Bookings
-      const bookingsRes = await axios.get('/api/bookings/active', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setBookings(bookingsRes.data);
+      const bookingsRes = await axios.get('/api/bookings/active');
+      setBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
 
-      // Fetch Summary if Super Admin
-      if (user?.role === 'superadmin') {
-        const summaryRes = await axios.get('/api/bookings/summary', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setSummary(summaryRes.data);
+      // Fetch Summary if Admin/SuperAdmin/SubAdmin
+      const currentRole = user?.role?.toLowerCase();
+      if (['superadmin', 'admin', 'subadmin'].includes(currentRole)) {
+        const summaryRes = await axios.get('/api/bookings/summary');
+        setSummary(summaryRes.data || { day: 0, month: 0, year: 0 });
       }
       // Fetch Available Services
-      const servicesRes = await axios.get('/api/services', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAvailableServices(servicesRes.data.filter(s => s.status === 'Active'));
+      const servicesRes = await axios.get('/api/services');
+      setAvailableServices(Array.isArray(servicesRes.data) ? servicesRes.data.filter(s => s.status === 'Active') : []);
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
@@ -66,7 +61,7 @@ const Bookings = () => {
       await axios.put(`/api/bookings/${bookingId}/add-service`, {
         name: service.name,
         price: service.price
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       
       // Update local state to reflect the new service (for checkout calculation)
       setBookings(prev => prev.map(b => 
@@ -82,9 +77,7 @@ const Bookings = () => {
 
   const handleExtendStay = async (bookingId, days) => {
     try {
-      const res = await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days });
       // Update local state with the returned updated booking
       setBookings(prev => prev.map(b => b._id === bookingId ? res.data : b));
       setShowExtendModal(null);
@@ -114,7 +107,7 @@ const Bookings = () => {
         isKeyReturned: penaltyData.isKeyReturned,
         isPropertyDamaged: penaltyData.isPropertyDamaged,
         paymentMethod: checkoutBooking.paymentMethod
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      });
       
       setCheckoutResult(res.data);
       setCheckoutStage('success');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import axios from '../api/axios';
 import { 
   Menu, X, Sun, Moon, Search, Calendar, Users, MapPin, 
   Wifi, Coffee, Utensils, Waves, Shield, Award, 
