@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, User, Phone, Mail, IdCard, Loader2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const CustomerDetails = () => {
+  const location = useLocation();
   const { token } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(location.state?.search || '');
+
+  useEffect(() => {
+    if (location.state?.search) {
+      setSearch(location.state.search);
+      // Optional: Clear state after setting search to prevent stale search on manual navigation
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchCustomers = async () => {

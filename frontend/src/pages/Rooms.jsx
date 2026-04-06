@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   BedDouble, Plus, Edit2, Trash2, Filter, Wifi, Snowflake, 
-  Tv, GlassWater, Utensils, ShieldCheck, X, MapPin, Coffee, Wind 
+  Tv, GlassWater, Utensils, ShieldCheck, X, MapPin, Coffee, Wind, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -107,6 +107,13 @@ const Rooms = () => {
     return acc;
   }, {});
 
+  useEffect(() => {
+    console.log('Rooms Mounted. Active Bookings Count:', activeBookings.length);
+    if (activeBookings.length > 0) {
+      console.log('Sample Booking Room Reference:', activeBookings[0].room);
+    }
+  }, [activeBookings]);
+
   const floors = Object.keys(roomsByFloor).sort();
 
   const getRoomCardStyle = (status) => {
@@ -123,43 +130,64 @@ const Rooms = () => {
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 900 }}>Rooms Status</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Real-time inventory by floor and category.</p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px' }}>Room Status</h1>
+          <p style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ padding: '2px 8px', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>v2.2.0</span>
+            Monitor and manage all hotel rooms in real-time
+          </p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <select 
-              value={filterType} 
-              onChange={(e) => setFilterType(e.target.value)} 
-              className="glass-card" 
-              style={{ padding: '12px 20px', background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '16px', fontSize: '14px', cursor: 'pointer', outline: 'none' }}
-            >
-              <option value="All">All Types</option>
-              <option value="Single">Single</option>
-              <option value="Double">Double</option>
-              <option value="Suite">Suite</option>
-              <option value="Deluxe">Deluxe</option>
-            </select>
-            <select 
-              value={filterCategory} 
-              onChange={(e) => setFilterCategory(e.target.value)} 
-              className="glass-card" 
-              style={{ padding: '12px 20px', background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '16px', fontSize: '14px', cursor: 'pointer', outline: 'none' }}
-            >
-              <option value="All">All Categories</option>
-              <option value="AC">AC</option>
-              <option value="NON-AC">Non-AC</option>
-            </select>
-          </div>
-          <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
           <button 
-            onClick={() => setShowAddRoomModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'black', border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: '13px', transition: '0.2s', boxShadow: '0 4px 12px rgba(212,175,55,0.2)' }}
+            onClick={fetchRooms}
+            disabled={loading}
+            style={{ padding: '12px 24px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '12px', border: '1px solid var(--primary)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            <Plus size={18} />
-            ADD ROOM
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Syncing...' : 'Refresh Status'}
           </button>
+          {['superadmin', 'subadmin'].includes(user?.role) && (
+            <button onClick={() => setShowAddModal(true)} className="btn-primary" style={{ padding: '12px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Plus size={20} />
+              <span>Register Room</span>
+            </button>
+          )}
         </div>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '32px', alignItems: 'center', background: 'var(--glass)', padding: '20px', borderRadius: '20px', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Filter size={18} style={{ color: 'var(--primary)' }} />
+          <select 
+            value={filterType} 
+            onChange={(e) => setFilterType(e.target.value)}
+            className="glass-card" 
+            style={{ padding: '12px 20px', background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '16px', fontSize: '14px', cursor: 'pointer', outline: 'none' }}
+          >
+            <option value="All">All Types</option>
+            <option value="Single">Single</option>
+            <option value="Double">Double</option>
+            <option value="Suite">Suite</option>
+            <option value="Deluxe">Deluxe</option>
+          </select>
+          <select 
+            value={filterCategory} 
+            onChange={(e) => setFilterCategory(e.target.value)} 
+            className="glass-card" 
+            style={{ padding: '12px 20px', background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '16px', fontSize: '14px', cursor: 'pointer', outline: 'none' }}
+          >
+            <option value="All">All Categories</option>
+            <option value="AC">AC</option>
+            <option value="NON-AC">Non-AC</option>
+          </select>
+        </div>
+        <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
+        <button 
+          onClick={() => setShowAddRoomModal(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'black', border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: '13px', transition: '0.2s', boxShadow: '0 4px 12px rgba(212,175,55,0.2)' }}
+        >
+          <Plus size={18} />
+          ADD ROOM
+        </button>
       </div>
 
       {loading ? <div style={{ textAlign: 'center', padding: '40px' }}>Syncing rooms...</div> : (
@@ -191,8 +219,13 @@ const Rooms = () => {
                         if (room.status === 'Available') navigate('/dashboard/enroll', { state: { roomNumber: room.roomNumber } });
                         else if (room.status === 'Cleaning' || room.status === 'Maintenance') setConfirmRoom(room);
                         else if (room.status === 'Occupied') {
-                          const booking = activeBookings.find(b => b.room?.roomNumber === room.roomNumber);
-                          setSelectedFacilities(booking || { room });
+                          // Standardize matching by checking both ID and roomNumber strings
+                          const booking = activeBookings.find(b => 
+                            (b.room?._id === room._id) || 
+                            (String(b.room) === String(room._id)) ||
+                            (b.room?.roomNumber === room.roomNumber)
+                          );
+                          setSelectedFacilities(booking || { room, isMissingData: true });
                         }
                       }}
                     >
@@ -320,8 +353,12 @@ const GuestInformationModal = ({ booking, onClose, navigate }) => {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
       <div className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px', textAlign: 'center' }}>
         <h3 style={{ marginBottom: '16px' }}>Room {booking.room?.roomNumber || booking.roomNumber} Details</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>No active guest information found for this room.</p>
-        <button onClick={onClose} className="btn btn-primary" style={{ width: '100%' }}>Close</button>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+          {booking.isMissingData 
+            ? "Syncing guest records... If this persists, the booking may have been completed or cancelled."
+            : "No active guest information found for this room."}
+        </p>
+        <button onClick={onClose} className="btn-primary" style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '8px' }}>Close</button>
       </div>
     </div>
   );
@@ -346,7 +383,7 @@ const GuestInformationModal = ({ booking, onClose, navigate }) => {
         <div style={{ padding: '24px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
             <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Contact Number</p><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer.phone}</p></div>
-            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID</p><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer.aadhar || 'Not Provided'}</p></div>
+            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID</p><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer.identityType}: {booking.customer.identityNumber}</p></div>
             <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Check-in Date</p><p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{new Date(booking.createdAt).toLocaleDateString()}</p></div>
             <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Expected Checkout</p><p style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{new Date(booking.expectedCheckOut).toLocaleDateString()}</p></div>
           </div>

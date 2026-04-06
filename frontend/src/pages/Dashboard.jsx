@@ -7,9 +7,9 @@ import {
   UserPlus, UserCheck, Bell, Search, Menu, X,
   Shield, BarChart, CalendarCheck, FileText, IndianRupee,
   Brush, Coffee, Clock, Utensils, MessageSquare,
-  Sun, Moon, AlertCircle, Globe
+  Sun, Moon, AlertCircle, Globe, User
 } from 'lucide-react';
-import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import Summary from './Summary';
 import Rooms from './Rooms';
 import Bookings from './Bookings';
@@ -44,12 +44,15 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, login, logout, token } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -84,18 +87,33 @@ const Dashboard = () => {
           const arrivalDiff = (now - new Date(b.createdAt)) / (1000 * 60);
 
           if (expiryDiff > 0 && expiryDiff <= 30) {
-            return { id: b._id, type: 'expiry', room: b.room?.roomNumber || 'Unknown', time: Math.round(expiryDiff) };
+            return { 
+              id: b._id, 
+              type: 'expiry', 
+              room: b.room?.roomNumber || 'Unknown', 
+              guest: b.customer?.name || 'Guest',
+              customer: b.customer,
+              booking: b,
+              time: Math.round(expiryDiff) 
+            };
           }
           if (arrivalDiff <= 15 && user?.role !== 'reception') {
-            return { id: b._id, type: 'arrival', room: b.room?.roomNumber || 'Unknown', guest: b.customer?.name || 'Guest' };
+            return { 
+              id: b._id, 
+              type: 'arrival', 
+              room: b.room?.roomNumber || 'Unknown', 
+              guest: b.customer?.name || 'Guest',
+              customer: b.customer,
+              booking: b
+            };
           }
           return null;
         }).filter(a => a !== null);
 
         // Add dummy notifications as requested for demonstration
         const dummyAlerts = [
-          { id: 'dummy-1', type: 'expiry', room: '302', time: 15, isDummy: true },
-          { id: 'dummy-2', type: 'expiry', room: '105', time: 5, isDummy: true }
+          { id: 'dummy-1', type: 'expiry', room: '302', guest: 'Rahul V.', time: 15, isDummy: true, customer: { name: 'Rahul V.', phone: '9876543210', identityNumber: 'ID-123456', identityType: 'Aadhar' }, booking: { checkIn: new Date(), expectedCheckOut: new Date(), totalAmount: 1500 } },
+          { id: 'dummy-2', type: 'expiry', room: '105', guest: 'Priya S.', time: 5, isDummy: true, customer: { name: 'Priya S.', phone: '9876543211', identityNumber: 'ID-654321', identityType: 'PAN Card' }, booking: { checkIn: new Date(), expectedCheckOut: new Date(), totalAmount: 2200 } }
         ];
         
         setNotifications([...dummyAlerts, ...fetchedAlerts]);
@@ -186,6 +204,7 @@ const Dashboard = () => {
               <BedDouble size={24} />
             </div>
             <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz</h2>
+            <span style={{ fontSize: '10px', background: 'var(--primary)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontWeight: 900 }}>v2.2.0</span>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {menu.map((item, idx) => (
@@ -261,15 +280,30 @@ const Dashboard = () => {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {notifications.map(n => (
-                        <div key={n.id} style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '12px', 
-                          padding: '12px', 
-                          background: n.type === 'expiry' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
-                          borderRadius: '12px', 
-                          borderLeft: `4px solid ${n.type === 'expiry' ? 'var(--danger)' : 'var(--success)'}` 
-                        }}>
+                        <div 
+                          key={n.id} 
+                          onClick={() => {
+                            setShowNotifications(false);
+                            if (n.customer) {
+                              setSelectedBooking(n);
+                              setShowModal(true);
+                            } else {
+                              navigate('/dashboard/customers', { state: { search: n.guest } });
+                            }
+                          }}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '12px', 
+                            padding: '12px', 
+                            background: n.type === 'expiry' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
+                            borderRadius: '12px', 
+                            borderLeft: `4px solid ${n.type === 'expiry' ? 'var(--danger)' : 'var(--success)'}`,
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }}
+                          className="hover-card"
+                        >
                           <div style={{ 
                             padding: '8px', 
                             background: n.type === 'expiry' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
@@ -283,8 +317,9 @@ const Dashboard = () => {
                               <p style={{ fontSize: '13px', fontWeight: 800 }}>Room {n.room}</p>
                               <span style={{ fontSize: '10px', opacity: 0.6 }}>{n.type === 'expiry' ? 'Checkout' : 'New Guest'}</span>
                             </div>
-                            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                              {n.type === 'expiry' ? `Expiring in ${n.time} mins` : `${n.guest} checked in recently`}
+                            <p style={{ fontSize: '11px', color: 'var(--text-main)', fontWeight: 600 }}>Guest: {n.guest}</p>
+                            <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                              {n.type === 'expiry' ? `Expiring in ${n.time} mins` : `Checked in recently`}
                             </p>
                           </div>
                         </div>
@@ -307,8 +342,76 @@ const Dashboard = () => {
           </div>
         </header>
 
+        {/* Quick View Modal */}
+        {showModal && selectedBooking && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '32px', position: 'relative', border: '1px solid var(--primary-glow)' }}>
+              <button 
+                onClick={() => setShowModal(false)}
+                style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={24} />
+              </button>
+
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div style={{ width: '64px', height: '64px', background: 'var(--primary)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: 'white' }}>
+                  <User size={32} />
+                </div>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{selectedBooking.customer?.name}</h2>
+                <p style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '14px' }}>Room {selectedBooking.room}</p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Phone Number</p>
+                  <p style={{ fontWeight: 600 }}>{selectedBooking.customer?.phone}</p>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Identity</p>
+                  <p style={{ fontWeight: 600 }}>{selectedBooking.customer?.identityType}: {selectedBooking.customer?.identityNumber}</p>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Check-in</p>
+                  <p style={{ fontWeight: 600 }}>{new Date(selectedBooking.booking?.checkIn).toLocaleDateString()}</p>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Amount Paid</p>
+                  <p style={{ fontWeight: 600, color: 'var(--success)' }}>₹{selectedBooking.booking?.totalAmount}</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  navigate('/dashboard/customers', { state: { search: selectedBooking.customer?.name } });
+                }}
+                style={{ width: '100%', padding: '14px', background: 'var(--primary)', color: 'white', borderRadius: '12px', border: 'none', fontWeight: 700, cursor: 'pointer', transition: 'var(--transition)' }}
+                className="btn-primary"
+              >
+                View Full Profile
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Dynamic Pages */}
         <main style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+          {/* LOUD DEBUG BANNER */}
+          <div style={{ 
+            background: '#ff0000', 
+            color: 'white', 
+            padding: '24px', 
+            marginBottom: '32px', 
+            borderRadius: '16px', 
+            textAlign: 'center', 
+            boxShadow: '0 10px 30px rgba(255,0,0,0.5)', 
+            border: '5px solid yellow',
+            animation: 'pulse 1s infinite'
+          }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, margin: '0 0 10px 0' }}>⚠️ SYSTEM UPDATE APPLIED (v2.2.0) ⚠️</h1>
+            <p style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>PLEASE PERFORM A HARD REFRESH: PRESS <strong>CTRL + F5</strong> NOW!</p>
+          </div>
+
           <Routes>
             <Route index element={
               user ? (
