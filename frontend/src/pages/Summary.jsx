@@ -67,12 +67,12 @@ const Summary = () => {
   const fetchStats = async () => {
     try {
       const results = await Promise.allSettled([
-        axios.get('http://localhost:5000/api/bookings/summary', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/rooms', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/attendance/today', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/bookings/active', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/services', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/bookings/summary', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/rooms', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/attendance/today', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/bookings/active', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/services', { headers: { Authorization: `Bearer ${token}` } })
       ]);
       
       const getData = (idx, defaultVal = {}) => 
@@ -145,7 +145,7 @@ const Summary = () => {
         price: Number(price)
       };
       
-      await axios.post('http://localhost:5000/api/rooms', payload, {
+      await axios.post('/api/rooms', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -167,7 +167,7 @@ const Summary = () => {
     if (!issueData.description) return toast.error('Please enter description');
     try {
       setIsUpdating(true);
-      await axios.post('http://localhost:5000/api/issues', { ...issueData, category: 'Other', priority: 'Medium' }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/issues', { ...issueData, category: 'Other', priority: 'Medium' }, { headers: { Authorization: `Bearer ${token}` } });
       setShowIssueModal(false);
       setIssueData({ description: '' });
       toast.success('Reported successfully to Management');
@@ -180,7 +180,7 @@ const Summary = () => {
 
   const handleAddService = async (bookingId, service) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${bookingId}/add-service`, {
+      await axios.put(`/api/bookings/${bookingId}/add-service`, {
         name: service.name,
         price: service.price
       }, { headers: { Authorization: `Bearer ${token}` } });
@@ -193,7 +193,7 @@ const Summary = () => {
 
   const handleExtendStay = async (bookingId, days) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${bookingId}/extend`, { extraDays: days }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days }, { headers: { Authorization: `Bearer ${token}` } });
       fetchStats();
       setShowExtendModal(null);
     } catch (err) {
@@ -204,7 +204,7 @@ const Summary = () => {
   const handleCheckout = async (id) => {
     try {
       setIsUpdating(true);
-      await axios.put(`http://localhost:5000/api/bookings/${id}/check-out`, {
+      await axios.put(`/api/bookings/${id}/check-out`, {
         penaltyAmount: penaltyData.amount,
         penaltyReason: penaltyData.reason,
         isKeyReturned: penaltyData.isKeyReturned,
@@ -225,7 +225,7 @@ const Summary = () => {
     if (!confirmRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`http://localhost:5000/api/rooms/${confirmRoom._id}`, { status: 'Available' }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' }, { headers: { Authorization: `Bearer ${token}` } });
       fetchStats();
       setConfirmRoom(null);
     } catch (err) {

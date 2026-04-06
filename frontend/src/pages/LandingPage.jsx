@@ -58,7 +58,7 @@ const LandingPage = () => {
     // Fetch Data
     const fetchData = async () => {
       try {
-        const roomsRes = await axios.get('http://localhost:5000/api/rooms');
+        const roomsRes = await axios.get('/api/rooms');
         setRooms(roomsRes.data.filter(r => r.status === 'Available').slice(0, 3));
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -283,7 +283,7 @@ const LandingPage = () => {
                 const btn = e.target.querySelector('button');
                 btn.disabled = true;
                 btn.innerText = 'Sending...';
-                await axios.post('http://localhost:5000/api/queries/submit', formData);
+                await axios.post('/api/queries/submit', formData);
                 alert('Thank you! Your inquiry has been submitted successfully.');
                 e.target.reset();
               } catch (err) {

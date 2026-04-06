@@ -37,7 +37,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/auth', {
+      const res = await axios.get('/api/auth', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -79,7 +79,7 @@ const UserManagement = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`http://localhost:5000/api/auth/${id}`, {
+      await axios.delete(`/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchUsers();
@@ -103,12 +103,12 @@ const UserManagement = () => {
     setCreating(true);
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/auth/${selectedUserId}`, formData, {
+        await axios.put(`/api/auth/${selectedUserId}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         showToast('User updated successfully!');
       } else {
-        await axios.post('http://localhost:5000/api/auth/register', formData, {
+        await axios.post('/api/auth/register', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         showToast('User created successfully!');

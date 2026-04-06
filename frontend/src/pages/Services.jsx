@@ -25,7 +25,7 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/services', {
+      const res = await axios.get('/api/services', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setServices(res.data);
@@ -40,11 +40,11 @@ const Services = () => {
     e.preventDefault();
     try {
       if (formData._id) {
-        await axios.put(`http://localhost:5000/api/services/${formData._id}`, formData, {
+        await axios.put(`/api/services/${formData._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:5000/api/services', formData, {
+        await axios.post('/api/services', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -61,7 +61,7 @@ const Services = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`http://localhost:5000/api/services/${id}`, {
+      await axios.delete(`/api/services/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchServices();

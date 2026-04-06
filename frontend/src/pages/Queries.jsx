@@ -11,7 +11,7 @@ const Queries = () => {
   const fetchQueries = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/queries', {
+      const res = await axios.get('/api/queries', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setQueries(res.data);
@@ -28,7 +28,7 @@ const Queries = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.patch(`http://localhost:5000/api/queries/${id}`, { status }, {
+      await axios.patch(`/api/queries/${id}`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchQueries();

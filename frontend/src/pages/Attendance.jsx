@@ -20,9 +20,9 @@ const Attendance = () => {
     try {
       setLoading(true);
       const [staffRes, historyRes, attRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/payouts', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`http://localhost:5000/api/attendance/date/${selectedDate}`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/auth', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/payouts', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`/api/attendance/date/${selectedDate}`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
       
       setStaff(staffRes.data.filter(u => u.role !== 'superadmin')); 
@@ -56,7 +56,7 @@ const Attendance = () => {
 
   const handleMarkAttendance = async (userId, status) => {
     try {
-      await axios.post('http://localhost:5000/api/attendance', 
+      await axios.post('/api/attendance', 
         { userId, status }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -71,7 +71,7 @@ const Attendance = () => {
     try {
       setReleasing(true);
       const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
-      await axios.post('http://localhost:5000/api/payouts/release', {
+      await axios.post('/api/payouts/release', {
         userId: selectedStaff._id,
         amount: selectedStaff.salary || 1500, // Fallback for demo
         month

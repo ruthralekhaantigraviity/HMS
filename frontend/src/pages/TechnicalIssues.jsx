@@ -17,7 +17,7 @@ const TechnicalIssues = () => {
 
   const fetchIssues = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/issues', {
+      const res = await axios.get('/api/issues', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIssues(Array.isArray(res.data) ? res.data : []);
@@ -37,7 +37,7 @@ const TechnicalIssues = () => {
     if (!issueData.description) return toast.error('Please enter description');
     
     setIsUpdating(true);
-    const reportPromise = axios.post('http://localhost:5000/api/issues', {
+    const reportPromise = axios.post('/api/issues', {
       description: issueData.description,
       category: 'IT',
       priority: 'High'

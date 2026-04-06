@@ -15,7 +15,7 @@ const Housekeeping = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/rooms', {
+      const res = await axios.get('/api/rooms', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRooms(res.data);
@@ -28,7 +28,7 @@ const Housekeeping = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/rooms/${id}`, { status }, {
+      await axios.put(`/api/rooms/${id}`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRooms();

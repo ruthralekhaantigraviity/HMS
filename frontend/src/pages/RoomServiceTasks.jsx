@@ -17,7 +17,7 @@ const RoomServiceTasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bookings/services/pending', {
+      const res = await axios.get('/api/bookings/services/pending', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTasks(res.data);
@@ -31,7 +31,7 @@ const RoomServiceTasks = () => {
   const handleDeliver = async (bookingId, serviceId) => {
     try {
       setUpdating(serviceId);
-      await axios.patch(`http://localhost:5000/api/bookings/${bookingId}/services/${serviceId}`, 
+      await axios.patch(`/api/bookings/${bookingId}/services/${serviceId}`, 
         { status: 'Delivered' },
         { headers: { Authorization: `Bearer ${token}` } }
       );

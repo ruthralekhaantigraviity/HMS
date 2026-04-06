@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { 
   BedDouble, Plus, Edit2, Trash2, Filter, Wifi, Snowflake, 
   Tv, GlassWater, Utensils, ShieldCheck, X, MapPin, Coffee, Wind, RefreshCw, AlertTriangle
@@ -36,8 +36,8 @@ const Rooms = () => {
     try {
       if (!token) return;
       const results = await Promise.allSettled([
-        axios.get('http://localhost:5000/api/rooms', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/api/bookings/active', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get('/api/rooms'),
+        axios.get('/api/bookings/active')
       ]);
       
       const rData = results[0].status === 'fulfilled' ? results[0].value.data : [];
@@ -56,7 +56,7 @@ const Rooms = () => {
     if (!confirmRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`http://localhost:5000/api/rooms/${confirmRoom._id}`, { status: 'Available' });
+      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' });
       setRooms(prev => prev.map(r => r._id === confirmRoom._id ? { ...r, status: 'Available' } : r));
       setConfirmRoom(null);
     } catch (err) {
@@ -82,7 +82,7 @@ const Rooms = () => {
         price: Number(price)
       };
 
-      await axios.post('http://localhost:5000/api/rooms', payload, {
+      await axios.post('/api/rooms', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

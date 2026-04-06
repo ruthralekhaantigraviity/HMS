@@ -12,7 +12,7 @@ const StaffPayouts = () => {
   useEffect(() => {
     const fetchPayouts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/payouts/me', {
+        const res = await axios.get('/api/payouts/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPayouts(res.data);

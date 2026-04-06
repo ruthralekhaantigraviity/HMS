@@ -34,7 +34,7 @@ const HotelManagement = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/rooms', {
+      const res = await axios.get('/api/rooms', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRooms(res.data);
@@ -79,12 +79,12 @@ const HotelManagement = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/rooms/${selectedRoomId}`, submissionData, {
+        await axios.put(`/api/rooms/${selectedRoomId}`, submissionData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Room configuration updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/rooms', submissionData, {
+        await axios.post('/api/rooms', submissionData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success(`Room ${submissionData.roomNumber} registered successfully`);
@@ -107,7 +107,7 @@ const HotelManagement = () => {
     const id = confirmModal.id;
     setConfirmModal({ ...confirmModal, show: false });
     try {
-      await axios.delete(`http://localhost:5000/api/rooms/${id}`, {
+      await axios.delete(`/api/rooms/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRooms();
@@ -128,7 +128,7 @@ const HotelManagement = () => {
 
   const updateRoomPrice = async (roomId, newPrice) => {
     try {
-      await axios.put(`http://localhost:5000/api/rooms/${roomId}`, { price: newPrice }, {
+      await axios.put(`/api/rooms/${roomId}`, { price: newPrice }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {

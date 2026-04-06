@@ -33,20 +33,20 @@ const Bookings = () => {
     try {
       setLoading(true);
       // Fetch Active Bookings
-      const bookingsRes = await axios.get('http://localhost:5000/api/bookings/active', {
+      const bookingsRes = await axios.get('/api/bookings/active', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBookings(bookingsRes.data);
 
       // Fetch Summary if Super Admin
       if (user?.role === 'superadmin') {
-        const summaryRes = await axios.get('http://localhost:5000/api/bookings/summary', {
+        const summaryRes = await axios.get('/api/bookings/summary', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSummary(summaryRes.data);
       }
       // Fetch Available Services
-      const servicesRes = await axios.get('http://localhost:5000/api/services', {
+      const servicesRes = await axios.get('/api/services', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAvailableServices(servicesRes.data.filter(s => s.status === 'Active'));
@@ -63,7 +63,7 @@ const Bookings = () => {
 
   const handleAddService = async (bookingId, service) => {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${bookingId}/add-service`, {
+      await axios.put(`/api/bookings/${bookingId}/add-service`, {
         name: service.name,
         price: service.price
       }, { headers: { Authorization: `Bearer ${token}` } });
@@ -82,7 +82,7 @@ const Bookings = () => {
 
   const handleExtendStay = async (bookingId, days) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/bookings/${bookingId}/extend`, { extraDays: days }, {
+      const res = await axios.put(`/api/bookings/${bookingId}/extend`, { extraDays: days }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Update local state with the returned updated booking
@@ -108,7 +108,7 @@ const Bookings = () => {
 
   const handleCheckout = async (id) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/bookings/${id}/check-out`, {
+      const res = await axios.put(`/api/bookings/${id}/check-out`, {
         penaltyAmount: penaltyData.amount,
         penaltyReason: penaltyData.reason,
         isKeyReturned: penaltyData.isKeyReturned,

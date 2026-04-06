@@ -76,7 +76,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
 
   const fetchAvailableRooms = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/rooms');
+      const res = await axios.get('/api/rooms');
       const avail = res.data.filter(r => r.status === 'Available');
       setRooms(avail);
       
@@ -170,7 +170,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
     if (phone.length >= 10) {
       try {
         const token = localStorage.getItem('hms_token');
-        const res = await axios.get(`http://localhost:5000/api/bookings/customers/search?phone=${phone}`, {
+        const res = await axios.get(`/api/bookings/customers/search?phone=${phone}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data) {
@@ -233,7 +233,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
       }
 
       // Enroll Customer
-      const custRes = await axios.post('http://localhost:5000/api/bookings/enroll', {
+      const custRes = await axios.post('/api/bookings/enroll', {
         name: formData.name, phone: formData.phone, email: formData.email,
         identityType: formData.identityType, identityNumber: formData.identityNumber,
         identityImage: formData.identityImage, location: formData.location
@@ -242,7 +242,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
       });
 
       // Create Booking
-      await axios.post('http://localhost:5000/api/bookings/check-in', {
+      await axios.post('/api/bookings/check-in', {
         customerId: custRes.data._id,
         roomId: formData.roomId,
         checkIn: `${formData.checkInDate}T${formData.checkInTime}`,

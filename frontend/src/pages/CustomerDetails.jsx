@@ -22,7 +22,7 @@ const CustomerDetails = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/bookings/customers', {
+        const res = await axios.get('/api/bookings/customers', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCustomers(res.data);

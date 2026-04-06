@@ -36,7 +36,7 @@ const ChatHub = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/messages/contacts', {
+      const res = await axios.get('/api/messages/contacts', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(res.data);
@@ -49,7 +49,7 @@ const ChatHub = () => {
 
   const fetchMessages = async (contactId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/messages/${contactId}`, {
+      const res = await axios.get(`/api/messages/${contactId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data);
@@ -64,7 +64,7 @@ const ChatHub = () => {
 
     try {
       setSending(true);
-      const res = await axios.post('http://localhost:5000/api/messages', {
+      const res = await axios.post('/api/messages', {
         receiverId: selectedContact._id,
         content: newMessage
       }, {

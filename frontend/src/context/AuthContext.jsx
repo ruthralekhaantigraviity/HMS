@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   }, [token, user]);
 
   const login = async (email, password) => {
-    const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+    const res = await axios.post('/api/auth/login', { email, password });
     
     // If token returned (Staff Bypass), set user/token now
     if (res.data.token) {
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
 
   const verifyOTP = async (email, otp) => {
-    const res = await axios.post('http://localhost:5000/api/auth/verify-otp', { email, otp });
+    const res = await axios.post('/api/auth/verify-otp', { email, otp });
     const { token: newToken, user: userData } = res.data;
     
     setToken(newToken);

@@ -20,7 +20,7 @@ const Inventory = () => {
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/inventory', {
+      const res = await axios.get('/api/inventory', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setItems(res.data);
@@ -45,7 +45,7 @@ const Inventory = () => {
         stock: Number(formData.stock),
         minStock: Number(formData.minStock)
       };
-      await axios.post('http://localhost:5000/api/inventory', payload, {
+      await axios.post('/api/inventory', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowAddModal(false);
@@ -63,7 +63,7 @@ const Inventory = () => {
     try {
       const item = items.find(i => i._id === itemId);
       const newStock = Math.max(0, item.stock + amount);
-      const res = await axios.put(`http://localhost:5000/api/inventory/${itemId}`, { stock: newStock }, {
+      const res = await axios.put(`/api/inventory/${itemId}`, { stock: newStock }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setItems(prev => prev.map(i => i._id === itemId ? res.data : i));

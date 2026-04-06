@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { 
   Users, BedDouble, Wallet, Settings, 
@@ -75,9 +75,7 @@ const Dashboard = () => {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/bookings/active', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/bookings/active');
         
         const now = new Date();
         const data = Array.isArray(res.data) ? res.data : [];
