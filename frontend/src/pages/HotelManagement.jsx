@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BedDouble, Plus, Edit3, Settings, DollarSign, Wrench, Loader2, X, Trash2, CheckCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 const HotelManagement = () => {
@@ -14,12 +15,6 @@ const HotelManagement = () => {
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const [updatingPrices, setUpdatingPrices] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
-  };
   
   const [formData, setFormData] = useState({
     roomNumber: '',
@@ -31,8 +26,10 @@ const HotelManagement = () => {
   });
 
   useEffect(() => {
-    fetchRooms();
-  }, []);
+    if (token) {
+      fetchRooms();
+    }
+  }, [token]);
 
   const fetchRooms = async () => {
     try {
@@ -69,17 +66,28 @@ const HotelManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCreating(true);
+    
+    // Explicitly construct payload with numeric casting
+    const submissionData = {
+      roomNumber: formData.roomNumber.trim(),
+      floor: Number(formData.floor),
+      type: formData.type,
+      category: formData.category,
+      price: Number(formData.price),
+      description: formData.description?.trim() || ''
+    };
+
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:5000/api/rooms/${selectedRoomId}`, formData, {
+        await axios.put(`http://localhost:5000/api/rooms/${selectedRoomId}`, submissionData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        showToast('Room updated successfully!');
+        toast.success('Room configuration updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/rooms', formData, {
+        await axios.post('http://localhost:5000/api/rooms', submissionData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        showToast('Room added successfully!');
+        toast.success(`Room ${submissionData.roomNumber} registered successfully`);
       }
       setShowAddModal(false);
       setIsEditing(false);
@@ -87,7 +95,9 @@ const HotelManagement = () => {
       setFormData({ roomNumber: '', floor: '', type: 'Single', category: 'AC', price: '', description: '' });
       fetchRooms();
     } catch (err) {
-      showToast(err.response?.data?.msg || 'Error processing request', 'error');
+      console.error('Submission Error:', err);
+      const errorMessage = err.response?.data?.msg || 'Unable to connect to registration service. Ensure backend is running.';
+      toast.error(errorMessage);
     } finally {
       setCreating(false);
     }
@@ -101,9 +111,9 @@ const HotelManagement = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRooms();
-      showToast('Room deleted successfully!');
+      toast.success('Room deleted successfully!');
     } catch (err) {
-      showToast(err.response?.data?.msg || 'Error deleting room', 'error');
+      toast.error(err.response?.data?.msg || 'Error deleting room');
     }
   };
 
@@ -133,10 +143,10 @@ const HotelManagement = () => {
       const targets = rooms.filter(r => r.category === category && r.type === type);
       await Promise.all(targets.map(r => updateRoomPrice(r._id, price)));
       fetchRooms();
-      showToast(`Pricing Configuration Completed`);
+      toast.success(`Pricing Configuration Completed`);
       setShowPricingModal(false);
     } catch (err) {
-      showToast('Error during pricing update', 'error');
+      toast.error('Error during pricing update');
     } finally {
       setUpdatingPrices(false);
     }
@@ -173,11 +183,11 @@ const HotelManagement = () => {
           <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <BedDouble size={20} color="var(--primary)" /> Room Categories
           </h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>AC Rooms</span>
             <span style={{ fontWeight: 700 }}>{acCount}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>Non-AC Rooms</span>
             <span style={{ fontWeight: 700 }}>{nonAcCount}</span>
           </div>
@@ -187,15 +197,15 @@ const HotelManagement = () => {
           <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <DollarSign size={20} color="var(--success)" /> Inventory Status
           </h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>Total Operational</span>
             <span style={{ fontWeight: 700, color: 'var(--success)' }}>{rooms.length - maintenanceCount} Rooms</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>Cleaning / Tidy</span>
             <span style={{ fontWeight: 700, color: '#3b82f6' }}>{cleaningCount} Rooms</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>Maintenance</span>
             <span style={{ fontWeight: 700, color: '#9ca3af' }}>{maintenanceCount} Rooms</span>
           </div>
@@ -205,11 +215,11 @@ const HotelManagement = () => {
           <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Wrench size={20} color="var(--danger)" /> System Controls
           </h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>All Floors</span>
             <span style={{ fontWeight: 700 }}>{new Set(rooms.map(r => r.floor)).size}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--bg-sec)', borderRadius: '8px' }}>
             <span>Active Sensors</span>
             <span style={{ fontWeight: 700, color: 'var(--success)' }}>Online</span>
           </div>
@@ -246,7 +256,7 @@ const HotelManagement = () => {
                       {room.category}
                     </span>
                   </td>
-                  <td style={{ padding: '20px 24px', fontWeight: 600 }}>${room.price}</td>
+                  <td style={{ padding: '20px 24px', fontWeight: 600 }}>₹{room.price}</td>
                   <td style={{ padding: '20px 24px' }}>
                     <span style={{ 
                       padding: '4px 10px', 
@@ -270,7 +280,7 @@ const HotelManagement = () => {
       </div>
 
       {showPricingModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)' }}>
           <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '700px', padding: '32px', borderRadius: '0', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
@@ -303,7 +313,10 @@ const HotelManagement = () => {
                       <button 
                         className="btn btn-primary" 
                         style={{ padding: '0 12px', borderRadius: 0, height: '40px' }}
-                        onClick={(e) => handleBulkUpdate('AC', type, e.target.previousSibling.value)}
+                        onClick={(e) => {
+                           const val = e.currentTarget.parentElement.querySelector('input').value;
+                           handleBulkUpdate('AC', type, val);
+                        }}
                       >Apply</button>
                     </div>
                   </div>
@@ -330,7 +343,10 @@ const HotelManagement = () => {
                       <button 
                         className="btn btn-primary" 
                         style={{ padding: '0 12px', borderRadius: 0, height: '40px' }}
-                        onClick={(e) => handleBulkUpdate('NON-AC', type, e.target.previousSibling.value)}
+                        onClick={(e) => {
+                           const val = e.currentTarget.parentElement.querySelector('input').value;
+                           handleBulkUpdate('NON-AC', type, val);
+                        }}
                       >Apply</button>
                     </div>
                   </div>
@@ -346,8 +362,14 @@ const HotelManagement = () => {
       )}
 
       {showAddModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <form onSubmit={handleSubmit} className="glass-card" style={{ width: '500px', padding: '32px', borderRadius: '0' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--glass)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>
+          <form onSubmit={handleSubmit} className="glass-card" style={{ position: 'relative', width: '500px', padding: '32px', borderRadius: '0', background: 'var(--surface)', overflow: 'hidden' }}>
+            {creating && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
+                <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                <span style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Processing Registration...</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2>{isEditing ? 'Edit Room Details' : 'Add New Room'}</h2>
               <button type="button" onClick={() => setShowAddModal(false)} style={{ background: 'none', color: 'var(--text-muted)' }}><X /></button>
@@ -395,38 +417,6 @@ const HotelManagement = () => {
               </button>
             </div>
           </form>
-        </div>
-      )}
-      {/* Toast Notification */}
-      {toast.show && (
-        <div 
-          style={{ 
-            position: 'fixed', 
-            top: '32px', 
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: toast.type === 'error' ? 'var(--danger)' : 'var(--primary)', 
-            color: 'var(--bg-dark)', 
-            padding: '16px 32px', 
-            borderRadius: '0', 
-            fontWeight: 800, 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px', 
-            zIndex: 99999,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            animation: 'toastIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards'
-          }}
-        >
-          <style>{`
-            @keyframes toastIn {
-              from { opacity: 0; transform: translate(-50%, -40px); }
-              to { opacity: 1; transform: translate(-50%, 0); }
-            }
-          `}</style>
-          {toast.type === 'success' ? <CheckCircle size={20} /> : <Settings size={20} />}
-          {toast.message}
         </div>
       )}
       {/* Confirm Deletion Modal */}

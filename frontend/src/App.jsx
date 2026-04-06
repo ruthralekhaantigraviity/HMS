@@ -34,25 +34,35 @@ function App() {
   return (
     <Router>
       <Toaster 
-        position="top-right"
+        position="top-center"
         toastOptions={{
+          duration: 5000,
           style: {
-            background: '#1e293b',
+            background: '#1a1a1a',
             color: '#d4af37',
-            border: '1px solid rgba(212, 175, 55, 0.2)',
-            borderRadius: '12px',
-            fontSize: '14px',
-            fontWeight: '600',
+            border: '2px solid #d4af37',
+            borderRadius: '0',
+            fontSize: '1.1rem',
+            fontWeight: '900',
             fontFamily: 'Outfit, sans-serif',
-            padding: '16px 24px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            zIndex: 999999
+            padding: '20px 40px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+            zIndex: 999999,
+            textAlign: 'center',
+            letterSpacing: '1px'
           },
           success: {
-            iconTheme: { primary: '#d4af37', secondary: 'black' }
+            iconTheme: { primary: '#d4af37', secondary: 'black' },
           },
           error: {
-            style: { background: '#ef4444', color: 'white', border: 'none' },
+            style: { 
+              background: '#b91c1c', 
+              color: '#ffffff', 
+              border: '2px solid #ef4444',
+              borderRadius: '0',
+              fontWeight: '900'
+            },
+            iconTheme: { primary: '#ffffff', secondary: '#b91c1c' }
           }
         }}
       />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
 import { useAuth } from '../context/AuthContext';
 import { 
   DollarSign, TrendingUp, Users, Calendar, Wallet, BedDouble, 
@@ -55,6 +56,7 @@ const Summary = () => {
   const [showExtendModal, setShowExtendModal] = useState(null);
   const [extensionDays, setExtensionDays] = useState(1);
   const [availableServices, setAvailableServices] = useState([]);
+  const [billingData, setBillingData] = useState({ amount: '', method: '' });
   
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
   const [newRoomData, setNewRoomData] = useState({ roomNumber: '', floor: '', type: 'Double', category: 'AC', price: '' });
@@ -100,7 +102,9 @@ const Summary = () => {
       setActiveBookings(activeBData || []);
       setAvailableServices(Array.isArray(sData) ? sData.filter(s => s.status === 'Active') : []);
     } catch (err) {
-      console.error('Critical Stats fetch failed', err);
+      if (err.response?.status !== 401) {
+        console.error('Critical Stats fetch failed', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -127,34 +131,32 @@ const Summary = () => {
     e.preventDefault();
     const { roomNumber, floor, price } = newRoomData;
     
-    if (!roomNumber || !floor || !price) {
-      console.warn('Room Registration Failed: Missing required fields', newRoomData);
-      return toast.error('Please fill all required fields (Room #, Floor, and Price)');
+    // Strict field validation
+    if (!roomNumber?.trim() || floor === '' || price === '') {
+      return toast.error('Required fields: Room Number, Floor, and Price');
     }
 
     try {
       setIsUpdating(true);
       const payload = {
         ...newRoomData,
+        roomNumber: roomNumber.trim(),
         floor: Number(floor),
         price: Number(price)
       };
-
-      console.log('Sending Room Registration Request:', payload);
       
-      const res = await axios.post('http://localhost:5000/api/rooms', payload, {
+      await axios.post('http://localhost:5000/api/rooms', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      console.log('Room Registration Success:', res.data);
       setShowAddRoomModal(false);
       setNewRoomData({ roomNumber: '', floor: '', type: 'Double', category: 'AC', price: '' });
       fetchStats();
-      toast.success(`Room ${roomNumber} registered successfully`);
+      toast.success(`Room ${payload.roomNumber} added to inventory`);
     } catch (err) {
-      console.error('Room Registration Error:', err.response?.data || err.message);
-      const errorMsg = err.response?.data?.msg || err.response?.data || 'Failed to create room. Please try again.';
-      toast.error(errorMsg);
+      console.error('Room Creation Error:', err);
+      const errorMessage = err.response?.data?.msg || 'Error connecting to room management';
+      toast.error(errorMessage);
     } finally {
       setIsUpdating(false);
     }
@@ -207,7 +209,8 @@ const Summary = () => {
         penaltyReason: penaltyData.reason,
         isKeyReturned: penaltyData.isKeyReturned,
         isPropertyDamaged: penaltyData.isPropertyDamaged,
-        paymentMethod: checkoutBooking.paymentMethod
+        paymentMethod: billingData.method,
+        finalSettlementAmount: billingData.amount || (checkoutBooking.totalAmount + (penaltyData.amount || 0))
       }, { headers: { Authorization: `Bearer ${token}` } });
       fetchStats();
       setCheckoutStage('success');
@@ -236,11 +239,11 @@ const Summary = () => {
 
   const getRoomCardStyle = (status) => {
     switch (status) {
-      case 'Available': return { bg: 'rgba(16, 185, 129, 0.05)', dot: '#10b981', text: '#059669', border: 'rgba(16, 185, 129, 0.1)' };
-      case 'Maintenance': return { bg: 'rgba(107, 114, 128, 0.05)', dot: '#6b7280', text: '#4b5563', border: 'rgba(107, 114, 128, 0.1)' };
-      case 'Cleaning': return { bg: 'rgba(234, 179, 8, 0.05)', dot: '#eab308', text: '#ca8a04', border: 'rgba(234, 179, 8, 0.1)' };
-      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.05)', dot: '#ef4444', text: '#dc2626', border: 'rgba(239, 68, 68, 0.1)' };
-      default: return { bg: 'var(--bg-sec)', dot: '#9ca3af', text: '#4b5563', border: 'var(--border)' };
+      case 'Available': return { bg: 'rgba(16, 185, 129, 0.1)', dot: 'var(--success)', text: 'var(--success)', border: 'rgba(16, 185, 129, 0.2)' };
+      case 'Maintenance': return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
+      case 'Cleaning': return { bg: 'rgba(234, 179, 8, 0.1)', dot: '#eab308', text: '#ca8a04', border: 'rgba(234, 179, 8, 0.2)' };
+      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.1)', dot: 'var(--danger)', text: 'var(--danger)', border: 'rgba(239, 68, 68, 0.2)' };
+      default: return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
     }
   };
 
@@ -248,10 +251,6 @@ const Summary = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '100px' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px' }}>HMS Performance Overview</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Real-time operational metrics for {user?.name}.</p>
-      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         <StatCard title="Today's Bookings" value={stats.bookings.day} subtext="New Check-ins" icon={Calendar} />
@@ -343,7 +342,7 @@ const Summary = () => {
                   borderRadius: '20px', 
                   fontSize: '10px', 
                   fontWeight: 900, 
-                  background: 'white', 
+                  background: 'var(--surface)', 
                   color: style.dot,
                   boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
                   textTransform: 'uppercase'
@@ -366,7 +365,7 @@ const Summary = () => {
 
       {/* Modals */}
       {confirmRoom && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
           <div className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px', textAlign: 'center' }}>
              <h3>Room {confirmRoom.roomNumber} Ready?</h3>
              <button onClick={handleMarkAvailable} className="btn btn-primary" style={{ width: '100%', marginTop: '24px' }}>Yes, Set Available</button>
@@ -403,9 +402,15 @@ const Summary = () => {
       )}
 
       {showAddRoomModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
-          <form onSubmit={handleCreateRoom} className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
-             <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '24px', color: 'var(--text-main)' }}>Register New Room</h3>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
+          <form onSubmit={handleCreateRoom} className="glass-card" style={{ position: 'relative', width: '100%', maxWidth: '400px', padding: '32px', overflow: 'hidden' }}>
+            {isUpdating && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
+                <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                <span style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Processing Room...</span>
+              </div>
+            )}
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: '24px', color: 'var(--text-main)' }}>Register New Room</h3>
              
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                <div style={{ textAlign: 'left' }}>
@@ -451,7 +456,7 @@ const Summary = () => {
       )}
       {/* Guest Information QuickView Modal */}
       {selectedFacilities && selectedFacilities.customer && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
           <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '0', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', position: 'relative' }}>
             {/* Header section */}
             <div style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
@@ -531,6 +536,200 @@ const Summary = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 🚀 ENHANCED MULTI-STAGE CHECKOUT MODAL */}
+      {checkoutBooking && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ padding: '8px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '8px' }}><LogOut size={20} /></div>
+                <div>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '2px', color: 'var(--text-main)' }}>Room {checkoutBooking.room?.roomNumber} Checkout</h2>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Guest: {checkoutBooking.customer?.name} • ID: #{checkoutBooking._id.slice(-6).toUpperCase()}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setCheckoutBooking(null); setCheckoutStage('audit'); setBillingData({ amount: '', method: '' }); }} 
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={{ padding: '32px' }}>
+              {/* STAGE 1: AUDIT & SHIFTING */}
+              {checkoutStage === 'audit' && (
+                <div className="animate-fade-in">
+                  <div style={{ marginBottom: '24px' }}>
+                    <h4 style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Stage 1: Property Verification</h4>
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>Please confirm room formalities and key return status before settling the final bill.</p>
+                    
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                      <div 
+                        onClick={() => setPenaltyData({...penaltyData, isKeyReturned: !penaltyData.isKeyReturned})}
+                        style={{ padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', background: penaltyData.isKeyReturned ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-sec)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s' }}
+                      >
+                        <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-main)' }}>Room Keys Returned?</span>
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid ' + (penaltyData.isKeyReturned ? '#10b981' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {penaltyData.isKeyReturned && <CheckCircle size={14} color="#10b981" />}
+                        </div>
+                      </div>
+
+                      <div 
+                        onClick={() => setPenaltyData({...penaltyData, isPropertyDamaged: !penaltyData.isPropertyDamaged})}
+                        style={{ padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', background: penaltyData.isPropertyDamaged ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-sec)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s' }}
+                      >
+                        <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-main)' }}>Property Damage Noted?</span>
+                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', border: '2px solid ' + (penaltyData.isPropertyDamaged ? '#ef4444' : 'var(--border)'), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {penaltyData.isPropertyDamaged && <div style={{ width: '10px', height: '10px', background: '#ef4444', borderRadius: '2px' }}></div>}
+                        </div>
+                      </div>
+
+                      {penaltyData.isPropertyDamaged && (
+                        <div className="input-group animate-slide-down">
+                          <label style={{ color: '#ef4444', fontWeight: 900 }}>Penalty Amount (₹)</label>
+                          <input 
+                            type="number" 
+                            value={penaltyData.amount} 
+                            onChange={e => setPenaltyData({...penaltyData, amount: Number(e.target.value)})} 
+                            placeholder="Enter damage cost..."
+                            style={{ borderColor: '#ef4444' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '32px' }}>
+                    <button 
+                      onClick={() => navigate('/dashboard/enroll', { state: { shiftingFrom: checkoutBooking } })}
+                      style={{ padding: '16px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                      <History size={18} /> Room Shifting
+                    </button>
+                    <button 
+                      disabled={!penaltyData.isKeyReturned}
+                      onClick={() => setCheckoutStage('billing')}
+                      style={{ padding: '16px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, cursor: 'pointer', opacity: penaltyData.isKeyReturned ? 1 : 0.5 }}
+                    >
+                      Proceed to Billing
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STAGE 2: FINAL BILLING & PAYMENT */}
+              {checkoutStage === 'billing' && (
+                <div className="animate-fade-in">
+                  <h4 style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>Stage 2: settlement</h4>
+                  
+                  <div style={{ background: 'var(--bg-sec)', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Original Stay Cost</span>
+                      <span style={{ fontWeight: 700 }}>₹{checkoutBooking.totalAmount}</span>
+                    </div>
+                    {penaltyData.amount > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', color: '#ef4444' }}>
+                        <span style={{ fontSize: '14px' }}>Penalty / Damages</span>
+                        <span style={{ fontWeight: 700 }}>+₹{penaltyData.amount}</span>
+                      </div>
+                    )}
+                    <div style={{ height: '1px', background: 'var(--border)', margin: '16px 0' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '1rem', fontWeight: 900 }}>Grand Total</span>
+                      <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>₹{checkoutBooking.totalAmount + (penaltyData.amount || 0)}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '32px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>Set Settlement Amount (₹)</label>
+                    <div style={{ position: 'relative' }}>
+                       <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: 'var(--text-muted)' }}>₹</span>
+                       <input 
+                         type="number" 
+                         value={billingData.amount || (checkoutBooking.totalAmount + (penaltyData.amount || 0))} 
+                         onChange={e => setBillingData({...billingData, amount: e.target.value})}
+                         style={{ paddingLeft: '32px', height: '56px', fontSize: '1.2rem', fontWeight: 900, background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '16px', color: 'var(--text-main)', width: '100%' }}
+                       />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '40px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '12px', display: 'block', textTransform: 'uppercase' }}>Select Payment Method</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <button 
+                        onClick={() => setBillingData({...billingData, method: 'Cash'})}
+                        style={{ padding: '16px', borderRadius: '16px', border: '2px solid ' + (billingData.method === 'Cash' ? 'var(--primary)' : 'var(--border)'), background: billingData.method === 'Cash' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-sec)', color: billingData.method === 'Cash' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}
+                      >
+                        CASH PAYMENT
+                      </button>
+                      <button 
+                        onClick={() => setBillingData({...billingData, method: 'UPI'})}
+                        style={{ padding: '16px', borderRadius: '16px', border: '2px solid ' + (billingData.method === 'UPI' ? 'var(--primary)' : 'var(--border)'), background: billingData.method === 'UPI' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-sec)', color: billingData.method === 'UPI' ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}
+                      >
+                        UPI / ONLINE
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    <button 
+                      disabled={!billingData.method || isUpdating}
+                      onClick={() => handleCheckout(checkoutBooking._id)}
+                      style={{ width: '100%', padding: '18px', borderRadius: '16px', background: 'var(--primary)', color: 'black', fontWeight: 900, border: 'none', cursor: 'pointer', fontSize: '1rem', opacity: billingData.method ? 1 : 0.5 }}
+                    >
+                      {isUpdating ? 'Processing...' : 'Confirm Checkout & Stay'}
+                    </button>
+                    <button 
+                      onClick={() => window.print()}
+                      style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      Generate Provisional Bill
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STAGE 3: SUCCESS */}
+              {checkoutStage === 'success' && (
+                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ width: '80px', height: '80px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                    <CheckCircle size={48} />
+                  </div>
+                  <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px' }}>Checkout Complete!</h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>The guest record has been archived and the room is now marked for cleaning.</p>
+                  
+                  <button 
+                    onClick={() => { setCheckoutBooking(null); setCheckoutStage('audit'); fetchStats(); }}
+                    style={{ width: '100%', padding: '18px', borderRadius: '16px', background: 'var(--primary)', color: 'black', fontWeight: 900, border: 'none', cursor: 'pointer' }}
+                  >
+                    Return to Dashboard
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 🧾 OFFICIAL LETTERHEAD PRINT TEMPLATE */}
+        <div id="printable-bill" style={{ display: 'none' }}>
+           {/* Simple static template for window.print() */}
+           <div style={{ padding: '40px', color: 'black' }}>
+             <h1 style={{ textAlign: 'center' }}>HOTEL SHUBHA SAI - FINAL BILL</h1>
+             <hr />
+             <p>Guest: {checkoutBooking.customer?.name}</p>
+             <p>Room: {checkoutBooking.room?.roomNumber}</p>
+             <p>Amount Settled: ₹{billingData.amount}</p>
+             <p>Method: {billingData.method}</p>
+             <p>Date: {new Date().toLocaleDateString()}</p>
+           </div>
+          </div>
+        </>
       )}
     </div>
   );

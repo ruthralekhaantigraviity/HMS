@@ -181,8 +181,8 @@ const Bookings = () => {
       {/* Attention Alert */}
       {bookings.some(b => getStayStatus(b.expectedCheckOut).pulse) && (
         <div style={{ 
-          background: '#fee2e2', 
-          border: '1px solid #ef4444', 
+          background: 'rgba(239, 68, 68, 0.1)', 
+          border: '1px solid var(--danger)', 
           padding: '20px 24px', 
           borderRadius: '12px', 
           marginBottom: '32px', 
@@ -208,10 +208,10 @@ const Bookings = () => {
               padding: '10px 32px', 
               borderRadius: '20px', 
               textTransform: 'capitalize',
-              background: activeTab === tab ? '#d4af37' : 'white',
-              color: activeTab === tab ? 'white' : '#6b7280',
+              background: activeTab === tab ? 'var(--primary)' : 'var(--surface)',
+              color: activeTab === tab ? 'var(--bg-main)' : 'var(--text-muted)',
               fontWeight: 700,
-              border: activeTab === tab ? 'none' : '1px solid #e5e7eb',
+              border: activeTab === tab ? 'none' : '1px solid var(--border)',
               cursor: 'pointer',
               fontSize: '14px',
               transition: '0.2s'
@@ -232,24 +232,24 @@ const Bookings = () => {
           style={{ 
             paddingLeft: '60px', 
             width: '100%',
-            background: 'white',
-            border: '1px solid #e5e7eb',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
             borderRadius: '16px',
-            color: '#1f2937',
+            color: 'var(--text-main)',
             height: '60px',
             fontSize: '15px',
             outline: 'none',
             transition: '0.2s'
           }} 
-          onFocus={(e) => e.target.style.borderColor = '#d4af37'}
-          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
         />
       </div>
 
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: '#fafafa', borderBottom: '1px solid #f3f4f6' }}>
+            <tr style={{ background: 'var(--bg-sec)', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Booking ID</th>
               <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Guest</th>
               <th style={{ padding: '20px 24px', color: '#6b7280', fontSize: '13px', fontWeight: 600 }}>Room</th>
@@ -265,17 +265,17 @@ const Bookings = () => {
               const status = getStayStatus(b.expectedCheckOut);
               return (
               <tr key={b._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 700 }}>#{b._id?.slice(-6).toUpperCase()}</td>
-                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 600 }}>{b.customer?.name || b.guest || 'Walk-in Guest'}</td>
-                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 600 }}>{b.room?.roomNumber || 'N/A'}</td>
+                <td style={{ padding: '20px 24px', color: 'var(--text-main)', fontWeight: 700 }}>#{b._id?.slice(-6).toUpperCase()}</td>
+                <td style={{ padding: '20px 24px', color: 'var(--text-main)', fontWeight: 600 }}>{b.customer?.name || b.guest || 'Walk-in Guest'}</td>
+                <td style={{ padding: '20px 24px', color: 'var(--text-main)', fontWeight: 600 }}>{b.room?.roomNumber || 'N/A'}</td>
                 <td style={{ padding: '20px 24px' }}>
                   {status.label === 'STAY EXPIRED' ? (
-                    <span style={{ color: '#ef4444', fontWeight: 800, fontSize: '12px' }}>STAY EXPIRED</span>
+                    <span style={{ color: 'var(--danger)', fontWeight: 800, fontSize: '12px' }}>STAY EXPIRED</span>
                   ) : (
-                    <span style={{ color: '#10b981', fontWeight: 600, fontSize: '12px' }}>{status.label}</span>
+                    <span style={{ color: 'var(--success)', fontWeight: 600, fontSize: '12px' }}>{status.label}</span>
                   )}
                 </td>
-                <td style={{ padding: '20px 24px', color: '#1f2937', fontWeight: 800 }}>
+                <td style={{ padding: '20px 24px', color: 'var(--text-main)', fontWeight: 800 }}>
                   ₹{Math.round(b.totalAmount + (b.additionalServices?.filter(s => !s.isPaid).reduce((sum, s) => sum + s.price, 0) * 1.12))}
                 </td>
                 <td style={{ padding: '20px 24px', textAlign: 'right' }}>
@@ -291,9 +291,9 @@ const Bookings = () => {
                             padding: '8px 16px', 
                             fontSize: '12px', 
                             fontWeight: 700,
-                            border: '1px solid #d4af37', 
-                            color: '#d4af37', 
-                            background: 'white', 
+                            border: '1px solid var(--primary)', 
+                            color: 'var(--primary)', 
+                            background: 'var(--surface)', 
                             cursor: 'pointer',
                             borderRadius: '4px'
                           }}
@@ -306,9 +306,9 @@ const Bookings = () => {
                             padding: '8px 16px', 
                             fontSize: '12px', 
                             fontWeight: 700,
-                            border: '1px solid #a855f7', 
-                            color: '#a855f7', 
-                            background: 'white', 
+                            border: '1px solid var(--accent)', 
+                            color: 'var(--accent)', 
+                            background: 'var(--surface)', 
                             cursor: 'pointer',
                             borderRadius: '4px'
                           }}
@@ -321,8 +321,8 @@ const Bookings = () => {
                             padding: '8px 16px', 
                             fontSize: '12px', 
                             fontWeight: 700,
-                            background: '#d4af37', 
-                            color: 'white', 
+                            background: 'var(--primary)', 
+                            color: 'var(--bg-dark)', 
                             border: 'none',
                             cursor: 'pointer',
                             borderRadius: '4px'
@@ -340,7 +340,7 @@ const Bookings = () => {
 
       {/* Enhanced Multi-Stage Checkout Modal */}
       {checkoutBooking && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)' }}>
             {/* Modal Header */}
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -508,7 +508,7 @@ const Bookings = () => {
                    <button 
                     onClick={() => handleCheckout(checkoutBooking._id)}
                     className="btn btn-primary" 
-                    style={{ width: '100%', padding: '18px', fontSize: '1.2rem' }}
+                    style={{ width: '100%', padding: '18px', fontSize: '1.2rem', color: 'var(--bg-dark)' }}
                   >
                     Checkout & Generate Bill
                   </button>

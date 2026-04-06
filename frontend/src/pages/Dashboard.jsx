@@ -100,7 +100,9 @@ const Dashboard = () => {
         
         setNotifications([...dummyAlerts, ...fetchedAlerts]);
       } catch (err) {
-        console.error('Notification fetch error:', err);
+        if (err.response?.status !== 401) {
+          console.error('Notification fetch error:', err);
+        }
       }
     };
 

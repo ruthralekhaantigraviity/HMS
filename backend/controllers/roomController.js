@@ -16,14 +16,31 @@ exports.getRooms = async (req, res) => {
 exports.addRoom = async (req, res) => {
   const { roomNumber, floor, type, category, price, description } = req.body;
   try {
-    let room = await Room.findOne({ roomNumber });
-    if (room) return res.status(400).json({ msg: 'Room already exists' });
+    // Basic validation
+    if (!roomNumber || floor === undefined || price === undefined) {
+      return res.status(400).json({ msg: 'Missing required fields: roomNumber, floor, and price' });
+    }
 
-    room = new Room({ roomNumber, floor, type, category, price, description });
+    let room = await Room.findOne({ roomNumber });
+    if (room) return res.status(400).json({ msg: `Room ${roomNumber} already exists in the system` });
+
+    room = new Room({ 
+      roomNumber, 
+      floor: Number(floor), 
+      type, 
+      category, 
+      price: Number(price), 
+      description 
+    });
+    
     await room.save();
-    res.json(room);
+    res.status(201).json(room);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Add Room Error:', err.message);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ msg: Object.values(err.errors).map(val => val.message).join(', ') });
+    }
+    res.status(500).json({ msg: 'Server connectivity error. Please try again later.' });
   }
 };
 
@@ -34,10 +51,19 @@ exports.updateRoom = async (req, res) => {
     let room = await Room.findById(req.params.id);
     if (!room) return res.status(404).json({ msg: 'Room not found' });
 
-    room = await Room.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    // Handle numeric casting if present in update body
+    const updateData = { ...req.body };
+    if (updateData.floor !== undefined) updateData.floor = Number(updateData.floor);
+    if (updateData.price !== undefined) updateData.price = Number(updateData.price);
+
+    room = await Room.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true, runValidators: true });
     res.json(room);
   } catch (err) {
-    res.status(500).send('Server Error');
+    console.error('Update Room Error:', err.message);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ msg: Object.values(err.errors).map(val => val.message).join(', ') });
+    }
+    res.status(500).json({ msg: 'Server error while updating room' });
   }
 };
 

@@ -42,12 +42,32 @@ const Enrollment = ({ isModal = false, onClose }) => {
 
   useEffect(() => {
     fetchAvailableRooms();
-    if (location.state?.roomNumber) {
-      // Find the room by number and select it
-      const preselected = rooms.find(r => r.roomNumber === location.state.roomNumber);
-      if (preselected) setFormData(prev => ({ ...prev, roomId: preselected._id }));
+  }, []);
+
+  useEffect(() => {
+    if (rooms.length > 0 && location.state?.roomNumber) {
+      const pre = rooms.find(r => r.roomNumber === location.state.roomNumber);
+      if (pre) setFormData(prev => ({ ...prev, roomId: pre._id }));
     }
-  }, [rooms.length]);
+  }, [rooms, location.state]);
+
+  // Handle Shifting Data Injection
+  useEffect(() => {
+    if (location.state?.shiftingFrom) {
+      const b = location.state.shiftingFrom;
+      setFormData(prev => ({
+        ...prev,
+        bookingType: 'SHIFT',
+        name: b.customer?.name || '',
+        phone: b.customer?.phone || '',
+        identityType: b.customer?.identityType || 'Aadhar',
+        identityNumber: b.customer?.identityNumber || '',
+        location: b.customer?.location || '',
+        email: b.customer?.email || ''
+      }));
+      toast.success('Shifting Mode: Guest data pre-populated');
+    }
+  }, [location.state]);
 
   // Handle Stay Duration Calculation (17h for Day 1, +24h for each extra day)
   useEffect(() => {
@@ -297,28 +317,27 @@ const Enrollment = ({ isModal = false, onClose }) => {
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: 600 }}>{formData.bookingType} Mode • Step {step} of 2</p>
           <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-             {['NEW', 'REFERRAL', 'HOURLY'].map(type => (
-               <span key={type} 
-                 onClick={() => setFormData({...formData, bookingType: type})}
-                 style={{ 
-                   padding: '8px 24px', borderRadius: '40px', cursor: 'pointer',
-                   background: formData.bookingType === type ? '#d4af37' : 'rgba(255,255,255,0.05)', 
-                   border: `1px solid ${formData.bookingType === type ? '#d4af37' : 'var(--border)'}`, 
-                   fontSize: '11px', fontWeight: 900, 
-                   color: formData.bookingType === type ? 'black' : 'var(--text-main)',
-                   transition: '0.3s'
-                 }}>
-                 {type}
-               </span>
-             ))}
+              {['NEW', 'REFERRAL', 'HOURLY'].map(type => (
+                <span key={type} 
+                  onClick={() => setFormData({...formData, bookingType: type})}
+                  style={{ 
+                    padding: '8px 24px', borderRadius: '40px', cursor: 'pointer',
+                    background: formData.bookingType === type ? 'var(--primary)' : 'var(--bg-sec)', 
+                    border: `1px solid ${formData.bookingType === type ? 'var(--primary)' : 'var(--border)'}`, 
+                    fontSize: '11px', fontWeight: 900, 
+                    color: formData.bookingType === type ? 'var(--bg-dark)' : 'var(--text-main)',
+                    transition: '0.3s'
+                  }}>
+                  {type}
+                </span>
+              ))}
           </div>
         </div>
         <button onClick={() => isModal ? onClose() : navigate('/dashboard')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={24} /></button>
       </div>
 
-      {/* Progress Bar (Integrated) */}
       <div style={{ height: '2px', background: 'var(--border)', width: '100%', position: 'relative' }}>
-        <div style={{ height: '100%', background: '#d4af37', width: `${(step/2)*100}%`, transition: '0.5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+        <div style={{ height: '100%', background: 'var(--primary)', width: `${(step/2)*100}%`, transition: '0.5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -338,7 +357,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
                   </div>
                 )}
                 {formData.bookingType === 'HOURLY' && (
-                   <div style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid #d4af37', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', color: '#d4af37', fontWeight: 800, fontSize: '0.9rem' }}>
+                   <div style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--primary)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem' }}>
                       🔥 Hourly Slot Price: ₹599 / head
                    </div>
                 )}
@@ -455,7 +474,7 @@ const Enrollment = ({ isModal = false, onClose }) => {
                     <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>₹{pricing.total.toFixed(0)}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>Est. Total</div>
                   </div>
-                  <button type="button" className="btn btn-primary" onClick={() => setStep(2)} style={{ padding: '16px 48px', borderRadius: '20px', fontSize: '1.1rem', background: '#d4af37', color: 'black', border: 'none' }}>
+                  <button type="button" className="btn btn-primary" onClick={() => setStep(2)} style={{ padding: '16px 48px', borderRadius: '20px', fontSize: '1.1rem', background: 'var(--primary)', color: 'var(--bg-dark)', border: 'none' }}>
                     Next — Settlement <ChevronRight size={20} style={{ marginLeft: '8px' }} />
                   </button>
                </div>
@@ -496,15 +515,15 @@ const Enrollment = ({ isModal = false, onClose }) => {
 
                 <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '20px', textTransform: 'uppercase' }}>Tax & Payment Policy</h4>
                 <div style={{ display: 'grid', gap: '24px' }}>
-                   <div style={{ display: 'flex', gap: '12px' }}>
-                     <button type="button" onClick={() => setFormData({...formData, hasGst: true})} style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.hasGst ? '#d4af37' : 'var(--bg-sec)', color: formData.hasGst ? 'black' : 'var(--text-muted)', border: `1px solid ${formData.hasGst ? '#d4af37' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>WITH GST (12%)</button>
-                     <button type="button" onClick={() => setFormData({...formData, hasGst: false})} style={{ flex: 1, height: '56px', borderRadius: '16px', background: !formData.hasGst ? 'var(--danger)' : 'var(--bg-sec)', color: !formData.hasGst ? 'white' : 'var(--text-muted)', border: `1px solid ${!formData.hasGst ? 'var(--danger)' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>WITHOUT GST</button>
-                   </div>
-                   
-                   <div style={{ display: 'flex', gap: '12px' }}>
-                     <button type="button" onClick={() => setFormData({...formData, paymentMethod: 'Online'})} className="btn" style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.paymentMethod === 'Online' ? '#d4af37' : 'var(--bg-sec)', color: formData.paymentMethod === 'Online' ? 'black' : 'var(--text-muted)', border: `1px solid ${formData.paymentMethod === 'Online' ? '#d4af37' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>Digital UPI</button>
-                     <button type="button" onClick={() => setFormData({...formData, paymentMethod: 'Cash'})} className="btn" style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.paymentMethod === 'Cash' ? '#d4af37' : 'var(--bg-sec)', color: formData.paymentMethod === 'Cash' ? 'black' : 'var(--text-muted)', border: `1px solid ${formData.paymentMethod === 'Cash' ? '#d4af37' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>Cash Payment</button>
-                   </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button type="button" onClick={() => setFormData({...formData, hasGst: true})} style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.hasGst ? 'var(--primary)' : 'var(--bg-sec)', color: formData.hasGst ? 'var(--bg-dark)' : 'var(--text-muted)', border: `1px solid ${formData.hasGst ? 'var(--primary)' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>WITH GST (12%)</button>
+                      <button type="button" onClick={() => setFormData({...formData, hasGst: false})} style={{ flex: 1, height: '56px', borderRadius: '16px', background: !formData.hasGst ? 'var(--danger)' : 'var(--bg-sec)', color: !formData.hasGst ? 'white' : 'var(--text-muted)', border: `1px solid ${!formData.hasGst ? 'var(--danger)' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>WITHOUT GST</button>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button type="button" onClick={() => setFormData({...formData, paymentMethod: 'Online'})} className="btn" style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.paymentMethod === 'Online' ? 'var(--primary)' : 'var(--bg-sec)', color: formData.paymentMethod === 'Online' ? 'var(--bg-dark)' : 'var(--text-muted)', border: `1px solid ${formData.paymentMethod === 'Online' ? 'var(--primary)' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>Digital UPI</button>
+                      <button type="button" onClick={() => setFormData({...formData, paymentMethod: 'Cash'})} className="btn" style={{ flex: 1, height: '56px', borderRadius: '16px', background: formData.paymentMethod === 'Cash' ? 'var(--primary)' : 'var(--bg-sec)', color: formData.paymentMethod === 'Cash' ? 'var(--bg-dark)' : 'var(--text-muted)', border: `1px solid ${formData.paymentMethod === 'Cash' ? 'var(--primary)' : 'var(--border)'}`, fontWeight: 800, fontSize: '0.9rem' }}>Cash Payment</button>
+                    </div>
                 </div>
               </div>
 
@@ -541,9 +560,9 @@ const Enrollment = ({ isModal = false, onClose }) => {
                   style={{ 
                     minWidth: '240px', 
                     borderRadius: '40px', 
-                    background: '#d4af37', 
-                    color: '#000000', 
-                    border: '1px solid #d4af37', 
+                    background: 'var(--primary)', 
+                    color: 'var(--bg-dark)', 
+                    border: '1px solid var(--primary)', 
                     fontWeight: 900, 
                     fontSize: '0.95rem'
                   }} disabled={loading}>

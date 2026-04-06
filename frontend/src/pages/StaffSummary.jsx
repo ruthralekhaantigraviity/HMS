@@ -36,11 +36,6 @@ const StaffSummary = () => {
 
   return (
     <div className="animate-fade-in" style={{ padding: '20px' }}>
-      <div style={{ padding: '32px', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Welcome back, {firstName}!</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Staff Member Dashboard • Dedicated {user?.role} Portal</p>
-      </div>
-
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         <div className="glass-card">
           <h3 style={{ marginBottom: '16px' }}>Attendance Status</h3>

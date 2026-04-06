@@ -110,7 +110,9 @@ exports.checkOut = async (req, res) => {
     // Add GST for extra charges (12%)
     const extraGst = extraCharges * 0.12;
     
-    booking.totalAmount = (booking.totalAmount || 0) + extraCharges + extraGst;
+    // Handle Final Settlement Amount from UI override or calculation
+    const calculatedTotal = (booking.totalAmount || 0) + extraCharges + extraGst;
+    booking.totalAmount = req.body.finalSettlementAmount ? Number(req.body.finalSettlementAmount) : calculatedTotal;
     booking.gstAmount = (booking.gstAmount || 0) + extraGst;
     
     // Mark all services as paid after checkout

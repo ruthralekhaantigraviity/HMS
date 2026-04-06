@@ -5,7 +5,6 @@
   --primary-hover: #b8860b;
   --bg-main: #ffffff;
   --bg-sec: #f8f9fa;
-  --bg-dark: #0f172a; /* Legacy var, will be replaced by bg-main in themes */
   --surface: #ffffff;
   --surface-hover: #f1f5f9;
   --text-main: #1a1a1a;
@@ -20,6 +19,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --input-bg: #ffffff;
 }
 
 /* Premium Toast Animations */
@@ -43,8 +43,8 @@
 }
 
 .toast-content {
-  background: white;
-  color: black;
+  background: var(--surface);
+  color: var(--text-main);
   padding: 16px 28px;
   border-radius: 16px;
   font-weight: 800;
@@ -67,15 +67,16 @@
 }
 
 [data-theme='dark'] {
-  --bg-main: #000000;
-  --bg-sec: #000000;
-  --surface: #000000;
-  --surface-hover: #1a1a1a;
+  --bg-main: #0a0a0a;
+  --bg-sec: #141414;
+  --surface: #121212;
+  --surface-hover: #1e1e1e;
   --text-main: #ffffff;
-  --text-muted: #a0a0a0;
-  --glass: rgba(0, 0, 0, 0.9);
-  --border: #222222;
+  --text-muted: #94a3b8;
+  --glass: rgba(0, 0, 0, 0.85);
+  --border: rgba(255, 255, 255, 0.1);
   --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
+  --input-bg: #0f172a;
 }
 
 * {

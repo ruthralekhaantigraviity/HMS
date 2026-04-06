@@ -12,7 +12,7 @@ const receptionistData = {
 
 mongoose.connect(mongoURI)
   .then(async () => {
-    const User = require('./models/User');
+    const User = require('../models/User');
     
     // Remove if exists
     await User.deleteOne({ email: receptionistData.email });

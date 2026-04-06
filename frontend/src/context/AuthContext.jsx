@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -23,8 +24,26 @@ export const AuthProvider = ({ children }) => {
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
+
+    // Add interceptor for 401 errors
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.warn('Unauthorized request detected. Clearing session.');
+          toast.error('Session expired. Please login again.', { id: 'session-expiry' });
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
     setLoading(false);
     console.log('AuthContext Ready: Token present:', !!token, 'Role:', user?.role);
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
   }, [token, user]);
 
   const login = async (email, password) => {

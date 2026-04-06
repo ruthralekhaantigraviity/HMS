@@ -8,7 +8,7 @@ const password = 'password123';
 const verify = async () => {
   try {
     await mongoose.connect(mongoURI);
-    const User = require('./models/User');
+    const User = require('../models/User');
     const user = await User.findOne({ email });
     
     if (!user) {

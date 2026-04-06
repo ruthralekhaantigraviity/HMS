@@ -89,9 +89,8 @@ const Rooms = () => {
       toast.success('Room Registered Successfully!');
       setShowAddRoomModal(false);
       setNewRoomData({ roomNumber: '', floor: '', type: 'Double', category: 'AC', price: '' });
-      fetchRooms(); // Refresh the list
+      fetchRooms(); 
     } catch (err) {
-      console.error('Room Registration Failed:', err);
       toast.error(err.response?.data?.msg || 'Failed to add room');
     } finally {
       setIsUpdating(false);
@@ -112,11 +111,11 @@ const Rooms = () => {
 
   const getRoomCardStyle = (status) => {
     switch (status) {
-      case 'Available': return { bg: 'rgba(16, 185, 129, 0.05)', dot: '#10b981', text: '#059669', border: 'rgba(16, 185, 129, 0.1)' };
-      case 'Maintenance': return { bg: 'rgba(107, 114, 128, 0.05)', dot: '#6b7280', text: '#4b5563', border: 'rgba(107, 114, 128, 0.1)' };
-      case 'Cleaning': return { bg: 'rgba(234, 179, 8, 0.05)', dot: '#eab308', text: '#ca8a04', border: 'rgba(234, 179, 8, 0.1)' };
-      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.05)', dot: '#ef4444', text: '#dc2626', border: 'rgba(239, 68, 68, 0.1)' };
-      default: return { bg: 'var(--bg-sec)', dot: '#9ca3af', text: '#4b5563', border: 'var(--border)' };
+      case 'Available': return { bg: 'rgba(16, 185, 129, 0.1)', dot: 'var(--success)', text: 'var(--success)', border: 'rgba(16, 185, 129, 0.2)' };
+      case 'Maintenance': return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
+      case 'Cleaning': return { bg: 'rgba(234, 179, 8, 0.1)', dot: '#eab308', text: '#ca8a04', border: 'rgba(234, 179, 8, 0.2)' };
+      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.1)', dot: 'var(--danger)', text: 'var(--danger)', border: 'rgba(239, 68, 68, 0.2)' };
+      default: return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
     }
   };
 
@@ -231,7 +230,7 @@ const Rooms = () => {
                         borderRadius: '20px', 
                         fontSize: '10px', 
                         fontWeight: 900, 
-                        background: 'white', 
+                        background: 'var(--surface)', 
                         color: style.dot,
                         boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
                         textTransform: 'uppercase'
@@ -328,7 +327,7 @@ const GuestInformationModal = ({ booking, onClose, navigate }) => {
   );
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
+  <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
       <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '0', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', position: 'relative' }}>
         <div style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
           <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>

@@ -1,9 +1,9 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
-const Room = require('./models/Room');
-const BlogPost = require('./models/BlogPost');
+const Room = require('../models/Room');
+const BlogPost = require('../models/BlogPost');
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hms';
 
 const luxuryRooms = [
   {

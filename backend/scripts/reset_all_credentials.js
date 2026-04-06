@@ -15,7 +15,7 @@ const users = [
 const seed = async () => {
   try {
     await mongoose.connect(mongoURI);
-    const User = require('./models/User');
+    const User = require('../models/User');
     
     // Clear existing test users
     const emails = users.map(u => u.email);
