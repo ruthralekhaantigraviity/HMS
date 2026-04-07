@@ -15,18 +15,12 @@ const Rooms = () => {
   const [filterType, setFilterType] = useState('All');
   const [filterCategory, setFilterCategory] = useState('All');
   const [confirmRoom, setConfirmRoom] = useState(null);
-  const [selectedFacilities, setSelectedFacilities] = useState(null); // Re-using for guest info
+  const [selectedRoom, setSelectedRoom] = useState(null); // Updated state for room details
   const [activeBookings, setActiveBookings] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [checkoutBooking, setCheckoutBooking] = useState(null);
-  const [checkoutStage, setCheckoutStage] = useState('audit');
   const { user, token } = useAuth();
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
   const [newRoomData, setNewRoomData] = useState({ roomNumber: '', floor: '', type: 'Double', category: 'AC', price: '' });
-
-  useEffect(() => {
-    console.log('Rooms Status Page - Current Rooms:', rooms.length, rooms);
-  }, [rooms]);
 
   useEffect(() => {
     if (token) fetchRooms();
@@ -53,14 +47,17 @@ const Rooms = () => {
   };
 
   const handleMarkAvailable = async () => {
-    if (!confirmRoom) return;
+    const targetRoom = confirmRoom || selectedRoom;
+    if (!targetRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' });
-      setRooms(prev => prev.map(r => r._id === confirmRoom._id ? { ...r, status: 'Available' } : r));
+      await axios.put(`/api/rooms/${targetRoom._id}`, { status: 'Available' });
+      setRooms(prev => prev.map(r => r._id === targetRoom._id ? { ...r, status: 'Available' } : r));
       setConfirmRoom(null);
+      setSelectedRoom(null);
+      toast.success(`Room ${targetRoom.roomNumber} is now Available`);
     } catch (err) {
-      alert('Error updating room status');
+      toast.error('Error updating room status');
     } finally {
       setIsUpdating(false);
     }
@@ -104,13 +101,6 @@ const Rooms = () => {
     (acc[room.floor] = acc[room.floor] || []).push(room);
     return acc;
   }, {});
-
-  useEffect(() => {
-    console.log('Rooms Mounted. Active Bookings Count:', activeBookings.length);
-    if (activeBookings.length > 0) {
-      console.log('Sample Booking Room Reference:', activeBookings[0].room);
-    }
-  }, [activeBookings]);
 
   const floors = Object.keys(roomsByFloor).sort();
 
@@ -213,49 +203,31 @@ const Rooms = () => {
                         borderRadius: '16px',
                         transition: '0.3s ease'
                       }}
-                      onClick={() => {
-                        if (room.status === 'Available') navigate('/dashboard/enroll', { state: { roomNumber: room.roomNumber } });
-                        else if (room.status === 'Cleaning' || room.status === 'Maintenance') setConfirmRoom(room);
-                        else if (room.status === 'Occupied') {
-                          // Standardize matching by checking both ID and roomNumber strings
-                          const lookupRoom = (room.roomNumber || '').toString();
-                          const booking = activeBookings.find(b => 
-                            (b.room?._id === room._id) || 
-                            (String(b.room) === String(room._id)) ||
-                            (b.room?.roomNumber?.toString() === lookupRoom)
-                          );
-                          setSelectedFacilities(booking || { room });
-                        }
-                      }}
+                      onClick={() => setSelectedRoom(room)}
                     >
-                      {/* Top Section */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: style.dot, boxShadow: `0 0 10px ${style.dot}50` }}></div>
                         <BedDouble size={18} color="rgba(59, 130, 246, 0.4)" />
                       </div>
 
-                      {/* Number Section */}
                       <div style={{ marginBottom: '8px' }}>
                         <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', opacity: 0.6, letterSpacing: '1px', marginBottom: '2px' }}>NO</div>
                         <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 1, marginBottom: '4px' }}>{room.roomNumber}</div>
-                        <div style={{ fontSize: '9px', color: '#06b6d4', fontWeight: 800, textDecoration: 'none', cursor: 'pointer', letterSpacing: '1px' }}>HISTORY</div>
+                        <div style={{ fontSize: '9px', color: '#06b6d4', fontWeight: 800, textDecoration: 'none', cursor: 'pointer', letterSpacing: '1px' }}>CLICK FOR INFO</div>
                       </div>
 
-                      {/* Info Label */}
                       <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '12px', letterSpacing: '0.5px' }}>
                         {room.category} • {room.type?.toUpperCase()}
                       </div>
 
-                      {/* Facility Icons */}
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '16px', opacity: 0.4 }}>
                         <Snowflake size={12} />
                         <Wifi size={12} />
-                        <MapPin size={12} />
+                        <GlassWater size={12} />
                         <Coffee size={12} />
                         <Wind size={12} />
                       </div>
 
-                      {/* Status Pill */}
                       <div style={{ 
                         display: 'inline-block', 
                         padding: '4px 14px', 
@@ -279,20 +251,17 @@ const Rooms = () => {
         </>
       )}
 
-      {confirmRoom && (
-        <ConfirmationModal 
-          room={confirmRoom} 
-          loading={isUpdating} 
-          onConfirm={handleMarkAvailable} 
-          onCancel={() => setConfirmRoom(null)} 
-        />
-      )}
-
-      {selectedFacilities && (
-        <GuestInformationModal 
-          booking={selectedFacilities} 
-          onClose={() => setSelectedFacilities(null)} 
+      {selectedRoom && (
+        <RoomDetailModal 
+          room={selectedRoom} 
+          booking={activeBookings.find(b => 
+            (String(b.room?._id || b.room) === String(selectedRoom._id)) ||
+            (b.room?.roomNumber?.toString() === selectedRoom.roomNumber.toString())
+          )}
+          onClose={() => setSelectedRoom(null)} 
+          onMarkAvailable={handleMarkAvailable}
           navigate={navigate}
+          loading={isUpdating}
         />
       )}
 
@@ -347,104 +316,145 @@ const Rooms = () => {
   );
 };
 
-const GuestInformationModal = ({ booking, onClose, navigate }) => {
-  if (!booking.customer) return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
-      <div className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px', textAlign: 'center' }}>
-        <h3 style={{ marginBottom: '16px' }}>Room {booking.room?.roomNumber || booking.roomNumber} Details</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
-          {booking.isMissingData 
-            ? "Syncing guest records... If this persists, the booking may have been completed or cancelled."
-            : "No active guest information found for this room."}
-        </p>
-        <button onClick={onClose} className="btn-primary" style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '8px' }}>Close</button>
-      </div>
-    </div>
-  );
+const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, loading }) => {
+  const amenities = room.amenities || ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service'];
+  
+  const amenityMap = {
+    'WiFi': { icon: Wifi, label: 'High Speed WiFi' },
+    'Air Conditioning': { icon: Snowflake, label: 'Climate Control AC' },
+    'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
+    'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
+    'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
+    'Room Service': { icon: Utensils, label: '24/7 Room Service' }
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Available': return 'var(--success)';
+      case 'Occupied': return 'var(--danger)';
+      case 'Cleaning': return '#eab308';
+      case 'Maintenance': return 'var(--text-muted)';
+      default: return 'var(--primary)';
+    }
+  };
 
   return (
-  <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
-      <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '0', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', position: 'relative' }}>
-        <div style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
-          <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', fontSize: '24px', fontWeight: 900 }}>{booking.customer.name.charAt(0)}</div>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
+      <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '600px', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)' }}>
+        {/* Header Section */}
+        <div style={{ padding: '32px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
+          <button onClick={onClose} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={24} /></button>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 0.8 }}>{room.roomNumber}</h2>
+            <div style={{ marginBottom: '6px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase' }}>{room.category} Edition</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-main)' }}>{room.type} Room</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: getStatusColor(room.status) }}>
+               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: getStatusColor(room.status) }}></div>
+               {room.status.toUpperCase()}
+             </span>
+             <span style={{ color: 'var(--border)' }}>|</span>
+             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Floor {room.floor}</span>
+             <span style={{ color: 'var(--border)' }}>|</span>
+             <span style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)' }}>₹{room.price}/Night</span>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div style={{ padding: '32px' }}>
+          {/* Facilities Row */}
+          <div style={{ marginBottom: '32px' }}>
+            <h4 style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', marginBottom: '20px', textTransform: 'uppercase' }}>Room Facilities & Strategic Perks</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+              {amenities.map(name => {
+                const item = amenityMap[name] || { icon: ShieldCheck, label: name };
+                const Icon = item.icon;
+                return (
+                  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <div style={{ color: 'var(--primary)' }}><Icon size={18} /></div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-main)' }}>{item.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Additional Info Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
             <div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px' }}>{booking.customer.name}</h3>
+              <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Bed Configuration</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Room {booking.room?.roomNumber}</span>
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border)' }}></span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Occupied</span>
+                <BedDouble size={16} style={{ color: 'var(--primary)' }} />
+                <p style={{ fontSize: '14px', fontWeight: 700 }}>{room.bedType || `${room.type} Bed Layout`}</p>
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Room View</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Globe size={16} style={{ color: 'var(--primary)' }} />
+                <p style={{ fontSize: '14px', fontWeight: 700 }}>{room.view || 'City Skyline View'}</p>
               </div>
             </div>
           </div>
-        </div>
-        <div style={{ padding: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
-            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Contact Number</p><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer.phone}</p></div>
-            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID</p><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer.identityType}: {booking.customer.identityNumber}</p></div>
-            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Check-in Date</p><p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{new Date(booking.createdAt).toLocaleDateString()}</p></div>
-            <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Expected Checkout</p><p style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{new Date(booking.expectedCheckOut).toLocaleDateString()}</p></div>
-          </div>
-          <div style={{ padding: '16px', background: 'rgba(212,175,55,0.05)', borderRadius: '12px', border: '1px solid rgba(212,175,55,0.1)', marginBottom: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '4px', textTransform: 'uppercase' }}>Current Billing</p><p style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)' }}>₹{booking.totalAmount}</p></div>
-              <div style={{ textAlign: 'right' }}><p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '4px', textTransform: 'uppercase' }}>Status</p><span style={{ padding: '4px 10px', background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '20px', fontSize: '10px', fontWeight: 900 }}>PAID</span></div>
+
+          {/* Guest Context if Occupied */}
+          {room.status === 'Occupied' && booking && (
+            <div style={{ padding: '20px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.1)', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                   <div style={{ width: '32px', height: '32px', background: 'var(--danger)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900 }}>{booking.customer?.name?.charAt(0) || 'G'}</div>
+                   <div>
+                     <p style={{ fontSize: '13px', fontWeight: 800 }}>In-House Guest: {booking.customer?.name}</p>
+                     <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Checking out on {new Date(booking.expectedCheckOut).toLocaleDateString()}</p>
+                   </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>TOTAL DUE</p>
+                  <p style={{ fontSize: '16px', fontWeight: 900, color: 'var(--danger)' }}>₹{booking.totalAmount}</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <button onClick={onClose} style={{ padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}>Close View</button>
-            <button onClick={() => { navigate('/dashboard', { state: { openCheckout: booking } }); onClose(); }} style={{ padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 12px rgba(212,175,55,0.3)', transition: '0.2s' }}>Go to Checkout</button>
+          )}
+
+          {/* Action Row */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: '0.2s' }}>Close Details</button>
+            
+            {room.status === 'Available' && (
+              <button 
+                onClick={() => { navigate('/dashboard/enroll', { state: { roomNumber: room.roomNumber } }); onClose(); }} 
+                style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 12px rgba(212,175,55,0.3)', transition: '0.2s' }}
+              >
+                Book Now • ₹{room.price}
+              </button>
+            )}
+
+            {room.status === 'Occupied' && (
+              <button 
+                onClick={() => { navigate('/dashboard', { state: { openCheckout: booking } }); onClose(); }} 
+                style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--danger)', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 12px rgba(239,68,68,0.3)', transition: '0.2s' }}
+              >
+                Proceed to Checkout
+              </button>
+            )}
+
+            {(room.status === 'Cleaning' || room.status === 'Maintenance') && (
+              <button 
+                onClick={onMarkAvailable} 
+                disabled={loading}
+                style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'var(--success)', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 12px rgba(16,185,129,0.3)', transition: '0.2s' }}
+              >
+                {loading ? 'Processing...' : 'Mark as Ready'}
+              </button>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
-const ConfirmationModal = ({ room, onConfirm, onCancel, loading }) => (
-  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
-    <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
-      <div style={{ padding: '32px', textAlign: 'center' }}>
-        <div style={{ 
-          width: '64px', 
-          height: '64px', 
-          background: room.status === 'Cleaning' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)', 
-          borderRadius: '50%', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          margin: '0 auto 24px',
-          color: room.status === 'Cleaning' ? '#3b82f6' : '#9ca3af'
-        }}>
-          <BedDouble size={32} />
-        </div>
-        
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '8px', color: 'var(--text-main)' }}>Room {room.roomNumber} Readiness</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '32px', lineHeight: '1.6' }}>
-          Is this room fully inspected, cleaned, and ready for new guest check-in?
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button 
-            onClick={onConfirm}
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--success)', border: 'none', color: 'white', fontWeight: 'bold' }}
-          >
-            {loading ? 'Updating...' : 'Yes, Room is Ready'}
-          </button>
-          <button 
-            onClick={onCancel}
-            disabled={loading}
-            className="btn"
-            style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--bg-sec)', border: '1px solid var(--border)', color: 'var(--text-main)' }}
-          >
-            No, Stay in {room.status}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export default Rooms;
