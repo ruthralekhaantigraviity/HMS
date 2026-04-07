@@ -21,6 +21,17 @@ app.get('/', (req, res) => {
   res.send('Hotel Management System API Running');
 });
 
+// Health Check Route
+app.get('/api/health', (req, res) => {
+  const status = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  res.json({
+    status,
+    database: mongoose.connection.name,
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV
+  });
+});
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const roomRoutes = require('./routes/roomRoutes');

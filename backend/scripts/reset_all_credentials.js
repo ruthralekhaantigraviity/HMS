@@ -1,7 +1,8 @@
+require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const mongoURI = 'mongodb://127.0.0.1:27017/hms';
+const mongoURI = process.env.MONGODB_URI;
 const password = 'password123';
 const staticOTP = '111111';
 

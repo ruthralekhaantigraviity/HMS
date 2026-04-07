@@ -6,13 +6,19 @@ const instance = axios.create({
 
 console.log('Axios Initialized with baseURL:', instance.defaults.baseURL);
 
-// Add a request interceptor to include the token if it exists
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('hms_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Add a response interceptor for debugging
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default instance;
