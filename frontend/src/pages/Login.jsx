@@ -24,7 +24,7 @@ const Login = () => {
         navigate('/dashboard');
       } else {
         toast.success('Login successful! Please verify OTP.');
-        navigate('/verify-otp', { state: { email } });
+        navigate('/verify-otp', { state: { email, otp: data.otp } });
       }
     } catch (err) {
       if (!err.response) {

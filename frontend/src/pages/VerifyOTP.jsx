@@ -50,6 +50,13 @@ const VerifyOTP = () => {
           <p style={{ color: 'var(--text-muted)' }}>We sent a code to {email}</p>
         </div>
 
+        {location.state?.otp && (
+          <div style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px dashed var(--primary)', color: 'var(--primary)', padding: '15px', borderRadius: '12px', marginBottom: '1.5rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' }}>Testing Code</p>
+            <h2 style={{ fontSize: '24px', letterSpacing: '4px' }}>{location.state.otp}</h2>
+          </div>
+        )}
+
         {error && <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '10px', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontSize: '14px' }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>

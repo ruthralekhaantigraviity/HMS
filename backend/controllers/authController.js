@@ -90,7 +90,7 @@ exports.login = async (req, res) => {
     // Send Email
     await sendEmail(user.email, otp);
 
-    res.json({ msg: 'OTP sent to your email' });
+    res.json({ msg: 'OTP sent to your email', otp }); // Return the OTP to the client for display
   } catch (err) {
     res.status(500).send('Server Error');
   }
