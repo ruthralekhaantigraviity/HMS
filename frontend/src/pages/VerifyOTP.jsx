@@ -25,7 +25,7 @@ const VerifyOTP = () => {
     setError('');
     try {
       await verifyOTP(email, otp);
-      toast.success('Identity verified! Welcome to HMS Elite.');
+      toast.success('Identity verified! Welcome to Hotel Glitz.');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Invalid or expired OTP');

@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
   const { token, loading } = useAuth();
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#d4af37' }}>
-      Handshaking with HMS Elite...
+      Handshaking with Hotel Glitz...
     </div>
   );
   if (!token) return <Navigate to="/login" />;

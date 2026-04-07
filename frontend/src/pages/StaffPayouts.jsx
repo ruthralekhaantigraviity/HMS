@@ -112,7 +112,7 @@ const StaffPayouts = () => {
               <button onClick={() => setSelectedPayout(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#888' }}>&times;</button>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '3px solid #f0f0f0', paddingBottom: '30px', marginBottom: '40px' }}>
                  <div>
-                    <h2 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '5px', color: '#1a1a1a' }}>HMS ELITE</h2>
+                    <h2 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '5px', color: '#1a1a1a' }}>HOTEL GLITZ</h2>
                     <p style={{ fontSize: '13px', color: '#666' }}>LUXURY HOSPITALITY & MANAGEMENT</p>
                  </div>
                  <div style={{ textAlign: 'right' }}>

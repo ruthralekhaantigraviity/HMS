@@ -46,7 +46,7 @@ const Login = () => {
           <div style={{ display: 'inline-flex', padding: '12px', background: 'var(--primary)', borderRadius: '12px', color: 'var(--bg-dark)', marginBottom: '1rem' }}>
             <Hotel size={32} />
           </div>
-          <h1>HMS Elite</h1>
+          <h1>Hotel Glitz</h1>
           <p style={{ color: 'var(--text-muted)' }}>Welcome back, please login</p>
         </div>
 
