@@ -132,14 +132,14 @@ body {
 /* Booking Form */
 .booking-container {
   background: white;
-  padding: 2rem;
+  padding: 1rem 1.5rem;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   width: 90%;
-  max-width: 1000px;
-  margin-top: 2rem;
+  max-width: 950px;
+  margin-top: 1.5rem;
 }
 
 [data-theme='dark'] .booking-container {
@@ -155,19 +155,19 @@ body {
 }
 
 .booking-group label {
-  font-size: 12px;
+  font-size: 10px;
   text-transform: uppercase;
   color: #888;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-weight: 600;
 }
 
 .booking-group input, .booking-group select {
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #eee;
   border-radius: 6px;
   outline: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   background: transparent;
   color: var(--text-main);
 }
@@ -180,11 +180,15 @@ body {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 0 2.5rem;
+  padding: 0 2rem;
+  height: 40px;
+  align-self: flex-end;
   border-radius: 6px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .book-btn:hover {

@@ -126,9 +126,12 @@ const LandingPage = () => {
               <option>Family</option>
             </select>
           </div>
-          <button className="book-btn">
-            <Search size={20} style={{ marginRight: '10px', verticalAlign: 'middle' }} />
-            Search Availability
+          <button 
+            className="book-btn" 
+            onClick={() => document.getElementById('rooms').scrollIntoView({ behavior: 'smooth' })}
+          >
+            <Search size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            BOOK NOW
           </button>
         </div>
       </header>
@@ -183,7 +186,12 @@ const LandingPage = () => {
                     <span><MapPin size={16} /> {room.view} View</span>
                   </div>
                   <p style={{ color: 'var(--text-sec)', marginBottom: '1.5rem', fontSize:'14px' }}>{room.description}</p>
-                  <button className="view-details-btn">View Suite Details</button>
+                  <button 
+                    className="view-details-btn"
+                    onClick={() => document.getElementById('rooms').scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    View Suite Details
+                  </button>
                 </div>
               </div>
             ))
