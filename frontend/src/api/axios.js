@@ -6,6 +6,16 @@ const instance = axios.create({
 
 console.log('Axios Initialized with baseURL:', instance.defaults.baseURL);
 
+// Add a request interceptor to include the token if it exists
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('hms_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    console.log('Attaching Authorization Header:', config.headers.Authorization);
+  }
+  return config;
+});
+
 // Add a response interceptor for debugging
 instance.interceptors.response.use(
   (response) => response,
