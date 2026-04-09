@@ -19,7 +19,10 @@ const amenityMap = {
   'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
   'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
   'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
-  'Room Service': { icon: Utensils, label: '24/7 Room Service' }
+  'Room Service': { icon: Utensils, label: '24/7 Room Service' },
+  'Balcony': { icon: MapPin, label: 'Private Balcony' },
+  'Coffee Maker': { icon: Coffee, label: 'Premium Coffee' },
+  'Ocean View': { icon: Wind, label: 'Scenic Ocean View' }
 };
 
 const StatCard = ({ title, value, subtext, icon: Icon }) => (

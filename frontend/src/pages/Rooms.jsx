@@ -12,7 +12,10 @@ const amenityMap = {
   'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
   'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
   'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
-  'Room Service': { icon: Utensils, label: '24/7 Room Service' }
+  'Room Service': { icon: Utensils, label: '24/7 Room Service' },
+  'Balcony': { icon: MapPin, label: 'Private Balcony' },
+  'Coffee Maker': { icon: Coffee, label: 'Premium Coffee' },
+  'Ocean View': { icon: Wind, label: 'Scenic Ocean View' }
 };
 
 const Rooms = () => {
@@ -125,10 +128,10 @@ const Rooms = () => {
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px' }}>Room Status</h1>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px' }}>Room Information</h1>
           <p style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ padding: '2px 8px', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>v2.2.0</span>
-            Monitor and manage all hotel rooms in real-time
+            <span style={{ padding: '2px 8px', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>v2.2.1</span>
+            Detailed facilities and real-time status overview
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
