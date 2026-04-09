@@ -216,7 +216,7 @@ const Dashboard = () => {
             <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', color: 'white' }}>
               <BedDouble size={24} />
             </div>
-            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz <span style={{fontSize: '9px', opacity: 0.5}}>(SYNC v4.3.0)</span></h2>
+            <h2 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz <span style={{fontSize: '9px', opacity: 0.6, color: 'var(--primary)' }}>(v4.3.1-SYNC)</span></h2>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {menu.map((item, idx) => (
