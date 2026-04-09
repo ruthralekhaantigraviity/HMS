@@ -147,7 +147,7 @@ const Dashboard = () => {
           { icon: UserCheck, label: 'Staff Directory', path: '/dashboard/staff' },
           { icon: CalendarCheck, label: 'Booking', path: '/dashboard/enroll' },
           { icon: IndianRupee, label: 'Salary Management', path: '/dashboard/salary' },
-          { icon: Wallet, label: 'Financial Mgt', path: '/dashboard/finance' },
+          { icon: Wallet, label: 'Financial Management', path: '/dashboard/finance' },
           { icon: ClipboardList, label: 'Inventory Management', path: '/dashboard/inventory' },
           { icon: BarChart, label: 'Revenue', path: '/dashboard/analytics' },
           { icon: AlertCircle, label: 'Technical Issues', path: '/dashboard/tech-issues' },
