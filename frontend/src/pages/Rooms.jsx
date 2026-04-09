@@ -8,6 +8,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
+const amenityMap = {
+  'WiFi': { icon: Wifi, label: 'High Speed WiFi' },
+  'Air Conditioning': { icon: Snowflake, label: 'Climate Control AC' },
+  'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
+  'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
+  'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
+  'Room Service': { icon: Utensils, label: '24/7 Room Service' }
+};
+
 const Rooms = () => {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
@@ -221,11 +230,10 @@ const Rooms = () => {
                       </div>
 
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '16px', opacity: 0.4 }}>
-                        <Snowflake size={12} />
-                        <Wifi size={12} />
-                        <GlassWater size={12} />
-                        <Coffee size={12} />
-                        <Wind size={12} />
+                        {(room.amenities?.length > 0 ? room.amenities : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service']).slice(0, 5).map((name, i) => {
+                          const Icon = amenityMap[name]?.icon || Snowflake;
+                          return <Icon key={i} size={12} />;
+                        })}
                       </div>
 
                       <div style={{ 
@@ -317,17 +325,8 @@ const Rooms = () => {
 };
 
 const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, loading }) => {
-  const amenities = room.amenities || ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service'];
+  const amenities = (room.amenities && room.amenities.length > 0) ? room.amenities : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service'];
   
-  const amenityMap = {
-    'WiFi': { icon: Wifi, label: 'High Speed WiFi' },
-    'Air Conditioning': { icon: Snowflake, label: 'Climate Control AC' },
-    'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
-    'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
-    'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
-    'Room Service': { icon: Utensils, label: '24/7 Room Service' }
-  };
-
   const getStatusColor = (status) => {
     switch(status) {
       case 'Available': return '#10b981';

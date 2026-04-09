@@ -13,6 +13,15 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
+const amenityMap = {
+  'WiFi': { icon: Wifi, label: 'High Speed WiFi' },
+  'Air Conditioning': { icon: Snowflake, label: 'Climate Control AC' },
+  'Smart TV': { icon: Tv, label: 'Smart 4K TV' },
+  'Mini Bar': { icon: GlassWater, label: 'Stocked Mini Bar' },
+  'Safe': { icon: ShieldCheck, label: 'Secure Safe Box' },
+  'Room Service': { icon: Utensils, label: '24/7 Room Service' }
+};
+
 const StatCard = ({ title, value, subtext, icon: Icon }) => (
   <div className="glass-card" style={{ padding: '24px' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -331,11 +340,10 @@ const Summary = () => {
 
                 {/* Facility Icons */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '16px', opacity: 0.4 }}>
-                  <Snowflake size={12} />
-                  <Wifi size={12} />
-                  <MapPin size={12} />
-                  <Coffee size={12} />
-                  <Wind size={12} />
+                  {(room.amenities?.length > 0 ? room.amenities : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service']).slice(0, 5).map((name, i) => {
+                    const Icon = amenityMap[name]?.icon || Snowflake;
+                    return <Icon key={i} size={12} />;
+                  })}
                 </div>
 
                 {/* Status Pill */}
