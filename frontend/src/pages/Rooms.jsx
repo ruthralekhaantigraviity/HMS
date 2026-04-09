@@ -338,7 +338,7 @@ const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, lo
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }} className="animate-fade-in">
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(10px)', padding: '20px' }} className="animate-fade-in">
       <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '600px', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', background: 'var(--surface)', minHeight: '400px' }}>
         {/* Header Section */}
         <div style={{ padding: '32px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
