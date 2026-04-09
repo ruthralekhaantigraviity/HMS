@@ -12,6 +12,10 @@ const UserManagement = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    console.log("!!! HMS USER MANAGEMENT UI v4.2.1 INITIALIZED !!!");
+  }, []);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
   const [formData, setFormData] = useState({ 
@@ -132,7 +136,7 @@ const UserManagement = () => {
         <div>
           <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px', letterSpacing: '-1px' }}>User Management</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ padding: '4px 12px', background: 'var(--primary)', color: 'black', borderRadius: '6px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>Secure Access v4.2</span>
+            <span style={{ padding: '4px 12px', background: 'var(--primary)', color: 'black', borderRadius: '6px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>Secure Access v4.2.1-SYNC</span>
             <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Configure administrative roles and granular staff permissions</p>
           </div>
         </div>
@@ -245,20 +249,21 @@ const UserManagement = () => {
 
       {/* Main Registration Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }} className="animate-fade-in">
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }} className="animate-fade-in">
           <form 
             onSubmit={handleSubmit} 
             className="animate-scale-in" 
             style={{ 
               width: '100%', 
-              maxWidth: '620px', 
+              maxWidth: '640px', 
               maxHeight: '90vh', 
               overflowY: 'auto', 
               background: 'var(--surface)', 
-              borderRadius: '24px', 
-              border: '1px solid var(--border)', 
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-              position: 'relative'
+              borderRadius: '28px', 
+              border: '1px solid rgba(212, 175, 55, 0.3)', 
+              boxShadow: '0 30px 60px -12px rgba(0,0,0,0.6)',
+              position: 'relative',
+              padding: '0'
             }}
           >
             {/* Modal Header */}
@@ -278,7 +283,7 @@ const UserManagement = () => {
 
             <div style={{ padding: '40px' }}>
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Full Legal Name</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Full Legal Name</label>
                 <input 
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
@@ -290,7 +295,7 @@ const UserManagement = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Professional Email</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Professional Email</label>
                   <input 
                     type="email" 
                     value={formData.email} 
@@ -301,7 +306,7 @@ const UserManagement = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Access Password</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Access Password</label>
                   <input 
                     type="password" 
                     value={formData.password} 
@@ -315,7 +320,7 @@ const UserManagement = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Primary Contact</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Primary Contact</label>
                   <input 
                     value={formData.phone} 
                     onChange={e => setFormData({...formData, phone: e.target.value})} 
@@ -325,7 +330,7 @@ const UserManagement = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Department Role</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Department Role</label>
                   <select 
                     value={formData.role} 
                     onChange={e => setFormData({...formData, role: e.target.value})} 
@@ -341,7 +346,7 @@ const UserManagement = () => {
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Assigned Operations Permissions</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Assigned Operations Permissions</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-sec)', padding: '24px', borderRadius: '18px', border: '1px solid var(--border)' }}>
                   {['Bookings', 'Rooms', 'Finance', 'Analytics', 'System Control'].map(p => (
                     <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>
@@ -354,11 +359,11 @@ const UserManagement = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Monthly Salary (₹)</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Monthly Salary (₹)</label>
                   <input type="number" value={formData.salary} onChange={e => setFormData({...formData, salary: e.target.value})} placeholder="Salary Amount" style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Verification Ref (UID)</label>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: '#d4af37', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' }}>Verification Ref (UID)</label>
                   <input value={formData.aadhar} onChange={e => setFormData({...formData, aadhar: e.target.value})} placeholder="Aadhar/PAN Card" style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} />
                 </div>
               </div>
