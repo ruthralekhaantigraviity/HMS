@@ -495,53 +495,56 @@ const Summary = () => {
 
             {/* Content section */}
             <div style={{ padding: '32px' }}>
-              {selectedFacilities.customer ? (
-                /* Guest Details View */
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+              {/* 1. ROOM FACILITIES (Always shown) */}
+              <div style={{ marginBottom: '32px' }}>
+                <h4 style={{ fontSize: '10px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }}>Room Facilities & Perks</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {( (selectedFacilities.customer ? selectedFacilities.room?.amenities : selectedFacilities.amenities)?.length > 0 
+                     ? (selectedFacilities.customer ? selectedFacilities.room.amenities : selectedFacilities.amenities) 
+                     : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service']
+                  ).slice(0, 6).map(name => {
+                    const item = amenityMap[name] || { icon: ShieldCheck, label: name };
+                    const Icon = item.icon;
+                    return (
+                      <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                        <div style={{ color: 'var(--primary)' }}><Icon size={14} /></div>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-main)' }}>{item.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. GUEST INFORMATION (If occupied) */}
+              {selectedFacilities.customer && (
+                <div style={{ padding: '20px', background: 'rgba(212,175,55,0.05)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.1)', marginBottom: '32px' }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>In-House Guest Details</h4>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                     <div>
-                      <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Contact Number</p>
-                      <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.phone}</p>
+                      <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Contact</p>
+                      <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.phone}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase' }}>Government ID</p>
-                      <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.identityType}: {selectedFacilities.customer.identityNumber}</p>
+                      <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Identity</p>
+                      <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedFacilities.customer.identityType}</p>
                     </div>
                   </div>
 
-                  <div style={{ padding: '16px', background: 'rgba(212,175,55,0.05)', borderRadius: '12px', border: '1px solid rgba(212,175,55,0.1)', marginBottom: '32px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '4px', textTransform: 'uppercase' }}>Stay Billing</p>
-                        <p style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)' }}>₹{selectedFacilities.totalAmount}</p>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '4px', textTransform: 'uppercase' }}>Expected Checkout</p>
-                        <p style={{ fontSize: '14px', fontWeight: 800, color: 'var(--danger)' }}>{new Date(selectedFacilities.expectedCheckOut).toLocaleDateString()}</p>
-                      </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
+                    <div>
+                      <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Total Due</p>
+                      <p style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)' }}>₹{selectedFacilities.totalAmount}</p>
                     </div>
-                  </div>
-                </>
-              ) : (
-                /* Facilities View for Available/Other rooms */
-                <div style={{ marginBottom: '32px' }}>
-                  <h4 style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', marginBottom: '20px', textTransform: 'uppercase' }}>Room Facilities & Strategic Perks</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-                    {(selectedFacilities.amenities?.length > 0 ? selectedFacilities.amenities : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service']).map(name => {
-                      const item = amenityMap[name] || { icon: ShieldCheck, label: name };
-                      const Icon = item.icon;
-                      return (
-                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                          <div style={{ color: 'var(--primary)' }}><Icon size={18} /></div>
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-main)' }}>{item.label}</span>
-                        </div>
-                      );
-                    })}
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Checkout Date</p>
+                      <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--danger)' }}>{new Date(selectedFacilities.expectedCheckOut).toLocaleDateString()}</p>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Action Buttons */}
+              {/* 3. ACTION BUTTONS */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <button 
                   onClick={() => setSelectedFacilities(null)}
@@ -564,7 +567,7 @@ const Summary = () => {
                   <button 
                     onClick={() => {
                       if (selectedFacilities.status === 'Available') {
-                        navigate('/dashboard/enroll', { state: { roomNumber: selectedFacilities.roomNumber } });
+                        navigate('/dashboard/enroll', { state: { roomNumber: selectedFacilities.roomNumber || selectedFacilities.room?.roomNumber } });
                       } else {
                         handleMarkAvailable(selectedFacilities);
                       }
@@ -572,7 +575,7 @@ const Summary = () => {
                     }}
                     style={{ padding: '14px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 12px rgba(212,175,55,0.3)', transition: '0.2s' }}
                   >
-                    {selectedFacilities.status === 'Available' ? 'Book This Room' : 'Mark as Ready'}
+                    {selectedFacilities.status === 'Available' ? 'Book Room' : 'Mark Ready'}
                   </button>
                 )}
               </div>

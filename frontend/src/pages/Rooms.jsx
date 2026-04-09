@@ -399,18 +399,28 @@ const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, lo
 
           {/* Guest Context if Occupied */}
           {room.status === 'Occupied' && booking && (
-            <div style={{ padding: '20px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.1)', marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                   <div style={{ width: '32px', height: '32px', background: 'var(--danger)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900 }}>{booking.customer?.name?.charAt(0) || 'G'}</div>
-                   <div>
-                     <p style={{ fontSize: '13px', fontWeight: 800 }}>In-House Guest: {booking.customer?.name}</p>
-                     <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Checking out on {new Date(booking.expectedCheckOut).toLocaleDateString()}</p>
-                   </div>
+            <div style={{ padding: '24px', background: 'rgba(212,175,55,0.05)', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.1)', marginBottom: '32px' }}>
+              <h4 style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1px', marginBottom: '16px', textTransform: 'uppercase' }}>In-House Guest Details</h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                <div>
+                  <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Contact Number</p>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer?.phone}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Guest Name</p>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{booking.customer?.name}</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
+                <div>
+                  <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Current Billing</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--primary)' }}>₹{booking.totalAmount}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>TOTAL DUE</p>
-                  <p style={{ fontSize: '16px', fontWeight: 900, color: 'var(--danger)' }}>₹{booking.totalAmount}</p>
+                  <p style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Scheduled Checkout</p>
+                  <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--danger)' }}>{new Date(booking.expectedCheckOut).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>
