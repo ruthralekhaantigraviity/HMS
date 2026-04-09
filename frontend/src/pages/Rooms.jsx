@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
-  Tv, GlassWater, Utensils, ShieldCheck, X, MapPin, Coffee, Wind, RefreshCw, AlertTriangle, Globe
+import { 
+  BedDouble, Plus, Edit2, Trash2, Filter, Wifi, Snowflake, 
+  Tv, GlassWater, Utensils, ShieldCheck, X, MapPin, Coffee, 
+  Wind, RefreshCw, AlertTriangle, Globe
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
