@@ -106,11 +106,11 @@ const Rooms = () => {
 
   const getRoomCardStyle = (status) => {
     switch (status) {
-      case 'Available': return { bg: 'rgba(16, 185, 129, 0.1)', dot: 'var(--success)', text: 'var(--success)', border: 'rgba(16, 185, 129, 0.2)' };
-      case 'Maintenance': return { bg: 'rgba(100, 116, 139, 0.1)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'rgba(100, 116, 139, 0.2)' };
+      case 'Available': return { bg: 'rgba(16, 185, 129, 0.1)', dot: '#10b981', text: '#10b981', border: 'rgba(16, 185, 129, 0.2)' };
+      case 'Maintenance': return { bg: 'rgba(100, 116, 139, 0.1)', dot: '#64748b', text: '#64748b', border: 'rgba(100, 116, 139, 0.2)' };
       case 'Cleaning': return { bg: 'rgba(59, 130, 246, 0.1)', dot: '#3b82f6', text: '#2563eb', border: 'rgba(59, 130, 246, 0.2)' };
-      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.1)', dot: 'var(--danger)', text: 'var(--danger)', border: 'rgba(239, 68, 68, 0.2)' };
-      default: return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
+      case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.1)', dot: '#ef4444', text: '#ef4444', border: 'rgba(239, 68, 68, 0.2)' };
+      default: return { bg: 'rgba(100, 116, 139, 0.1)', dot: '#64748b', text: '#64748b', border: 'rgba(100, 116, 139, 0.2)' };
     }
   };
 
@@ -330,11 +330,11 @@ const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, lo
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'Available': return 'var(--success)';
-      case 'Occupied': return 'var(--danger)';
+      case 'Available': return '#10b981';
+      case 'Occupied': return '#ef4444';
       case 'Cleaning': return '#3b82f6';
-      case 'Maintenance': return 'var(--text-muted)';
-      default: return 'var(--primary)';
+      case 'Maintenance': return '#64748b';
+      default: return '#d4af37';
     }
   };
 
