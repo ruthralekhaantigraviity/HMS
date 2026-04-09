@@ -502,19 +502,29 @@ const Summary = () => {
               <div style={{ marginBottom: '32px' }}>
                 <h4 style={{ fontSize: '10px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '2px', marginBottom: '16px', textTransform: 'uppercase' }}>Room Facilities & Perks</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  {( (selectedFacilities.customer ? selectedFacilities.room?.amenities : selectedFacilities.amenities)?.length > 0 
-                     ? (selectedFacilities.customer ? selectedFacilities.room.amenities : selectedFacilities.amenities) 
-                     : ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service']
-                  ).slice(0, 6).map(name => {
+                  {(
+                    (selectedFacilities?.customer ? selectedFacilities?.room?.amenities : selectedFacilities?.amenities)
+                  )?.slice(0, 6).map(name => {
                     const item = amenityMap[name] || { icon: ShieldCheck, label: name };
-                    const Icon = item.icon;
+                    const Icon = item.icon || ShieldCheck;
                     return (
                       <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid var(--border)' }}>
                         <div style={{ color: 'var(--primary)' }}><Icon size={14} /></div>
                         <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-main)' }}>{item.label}</span>
                       </div>
                     );
-                  })}
+                  }) || (
+                    ['WiFi', 'Air Conditioning', 'Smart TV', 'Mini Bar', 'Safe', 'Room Service'].map(name => {
+                      const item = amenityMap[name] || { icon: ShieldCheck, label: name };
+                      const Icon = item.icon || ShieldCheck;
+                      return (
+                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                          <div style={{ color: 'var(--primary)' }}><Icon size={14} /></div>
+                          <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-main)' }}>{item.label}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
