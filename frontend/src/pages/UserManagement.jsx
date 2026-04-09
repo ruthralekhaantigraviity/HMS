@@ -15,7 +15,7 @@ const UserManagement = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ show: false, id: null, title: '', message: '' });
   const [formData, setFormData] = useState({ 
-    role: 'subadmin', permissions: [],
+    name: '', email: '', password: '', role: 'subadmin', permissions: [],
     phone: '', location: '', aadhar: '', pan: '', salary: 0
   });
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -38,7 +38,7 @@ const UserManagement = () => {
     try {
       setLoading(true);
       const res = await axios.get('/api/auth');
-      setUsers(res.data);
+      setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error fetching users:', err);
     } finally {
@@ -57,10 +57,10 @@ const UserManagement = () => {
 
   const handleEdit = (user) => {
     setFormData({
-      name: user.name,
-      email: user.email,
-      password: '', // Leave blank unless changing
-      role: user.role,
+      name: user.name || '',
+      email: user.email || '',
+      password: '', 
+      role: user.role || 'subadmin',
       permissions: user.permissions || [],
       phone: user.phone || '',
       location: user.location || '',
@@ -126,156 +126,211 @@ const UserManagement = () => {
   });
 
   return (
-    <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+    <div className="animate-fade-in" style={{ padding: '0 10px' }}>
+      {/* Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px' }}>User Management</h1>
-          <p style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ padding: '2px 8px', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>v4.1.0</span>
-            Manage hotel staff, sub-admins, and granular access permissions
-          </p>
+          <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px', letterSpacing: '-1px' }}>User Management</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ padding: '4px 12px', background: 'var(--primary)', color: 'black', borderRadius: '6px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>Secure Access v4.2</span>
+            <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Configure administrative roles and granular staff permissions</p>
+          </div>
         </div>
         <button 
-          onClick={() => { setIsEditing(false); setShowModal(true); }} 
-          style={{ height: '52px', padding: '0 24px', background: 'var(--primary)', color: 'black', borderRadius: '14px', fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 15px rgba(211, 175, 55, 0.2)' }}
+          onClick={() => { 
+            setIsEditing(false); 
+            setFormData({ name: '', email: '', password: '', role: 'subadmin', permissions: [], phone: '', location: '', aadhar: '', pan: '', salary: 0 });
+            setShowModal(true); 
+          }} 
+          style={{ height: '56px', padding: '0 32px', background: 'var(--primary)', color: 'black', borderRadius: '16px', fontWeight: 900, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 8px 25px rgba(212, 175, 55, 0.3)', border: 'none', cursor: 'pointer', transition: '0.3s' }}
         >
-          <UserPlus size={20} /> Add New User
+          <UserPlus size={22} /> Register Member
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', borderBottom: '1px solid var(--border)' }}>
-        {['superadmin', 'admin'].includes(user?.role?.toLowerCase()) && (
+      {/* Tabs Section */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', background: 'var(--surface)', padding: '6px', borderRadius: '16px', width: 'fit-content', border: '1px solid var(--border)' }}>
+        {[
+          { id: 'subadmins', label: 'Sub-Admins', roles: ['subadmin'] },
+          { id: 'reception', label: 'Reception', roles: ['reception'] },
+          { id: 'operations', label: 'Operations', roles: ['housekeeping', 'roomservice'] }
+        ].map(tab => (
           <button 
-            onClick={() => setActiveTab('subadmins')}
-            style={{ padding: '12px 24px', background: 'none', color: activeTab === 'subadmins' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'subadmins' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{ 
+              padding: '12px 24px', 
+              borderRadius: '12px', 
+              background: activeTab === tab.id ? 'var(--primary)' : 'transparent',
+              color: activeTab === tab.id ? 'black' : 'var(--text-muted)',
+              fontWeight: 800,
+              fontSize: '14px',
+              border: 'none',
+              cursor: 'pointer',
+              transition: '0.2s'
+            }}
           >
-            Sub Admins
+            {tab.label}
           </button>
-        )}
-        <button 
-          onClick={() => setActiveTab('reception')}
-          style={{ padding: '12px 24px', background: 'none', color: activeTab === 'reception' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'reception' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
-        >
-          Reception Staff
-        </button>
-        <button 
-          onClick={() => setActiveTab('operations')}
-          style={{ padding: '12px 24px', background: 'none', color: activeTab === 'operations' ? 'var(--primary)' : 'var(--text-muted)', borderBottom: activeTab === 'operations' ? '2px solid var(--primary)' : 'none', fontWeight: 600 }}
-        >
-          Operations Staff
-        </button>
+        ))}
       </div>
 
-      <div className="glass-card" style={{ padding: 0 }}>
-        {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
-        ) : (
+      {/* Table Section */}
+      <div className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }}>
+        <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Name</th>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Email</th>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Password</th>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Permissions</th>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px' }}>Status</th>
-                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '14px', textAlign: 'right' }}>Actions</th>
+              <tr style={{ background: 'var(--bg-sec)', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900 }}>Staff Profile</th>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900 }}>Credentials</th>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900 }}>System Privileges</th>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900 }}>Status</th>
+                <th style={{ padding: '20px 24px', color: 'var(--text-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900, textAlign: 'right' }}>Management</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length === 0 ? (
-                <tr><td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No staff found in this category.</td></tr>
-              ) : filteredUsers.map(user => (
-                <tr key={user._id} style={{ borderBottom: '1px solid var(--border)' }}>
+              {loading ? (
+                <tr><td colSpan="5" style={{ padding: '60px', textAlign: 'center' }}><Loader2 className="animate-spin" size={32} color="var(--primary)" /></td></tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr><td colSpan="5" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>No active members found in this cluster.</td></tr>
+              ) : filteredUsers.map(member => (
+                <tr key={member._id} style={{ borderBottom: '1px solid var(--border)', transition: '0.2s' }}>
                   <td style={{ padding: '20px 24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--bg-sec)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
-                        <UserCheck size={20} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--bg-sec)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', fontWeight: 900, fontSize: '1.2rem' }}>
+                        {member.name?.charAt(0)}
                       </div>
-                      <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{user.name}</span>
+                      <div>
+                        <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '15px' }}>{member.name}</p>
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{member.role}</p>
+                      </div>
                     </div>
                   </td>
-                  <td style={{ padding: '20px 24px', color: 'var(--text-muted)' }}>{user.email}</td>
                   <td style={{ padding: '20px 24px' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-main)', fontWeight: 600, marginBottom: '6px' }}>{member.email}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <code style={{ background: 'var(--bg-sec)', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--primary)', letterSpacing: '1px', border: '1px solid var(--border)', fontWeight: 700 }}>
-                        {visiblePasswords[user._id] ? (user.plainPassword || 'password123') : '••••••••'}
+                      <code style={{ background: 'var(--bg-sec)', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', color: 'var(--primary)', border: '1px solid var(--border)', fontWeight: 700 }}>
+                        {visiblePasswords[member._id] ? (member.plainPassword || '••••••••') : '••••••••'}
                       </code>
-                      <button 
-                        onClick={() => togglePasswordVisibility(user._id)}
-                        style={{ background: 'var(--bg-sec)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', transition: '0.2s' }}
-                        title={visiblePasswords[user._id] ? "Hide Password" : "Show Password"}
-                      >
-                        {visiblePasswords[user._id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                      <button onClick={() => togglePasswordVisibility(member._id)} style={{ padding: '4px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        {visiblePasswords[member._id] ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
                   </td>
                   <td style={{ padding: '20px 24px' }}>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {user.permissions?.map(p => (
-                        <span key={p} style={{ fontSize: '11px', padding: '4px 8px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '4px' }}>{p}</span>
+                      {member.permissions?.map(p => (
+                        <span key={p} style={{ fontSize: '10px', padding: '4px 10px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--primary)', borderRadius: '6px', fontWeight: 800, border: '1px solid rgba(212, 175, 55, 0.2)' }}>{p}</span>
                       ))}
                     </div>
                   </td>
                   <td style={{ padding: '20px 24px' }}>
-                    <span style={{ fontSize: '12px', color: user.isVerified ? 'var(--success)' : 'var(--danger)' }}>● {user.isVerified ? 'Active' : 'Pending'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: member.isVerified ? 'var(--success)' : 'var(--danger)' }}></div>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: member.isVerified ? 'var(--success)' : 'var(--danger)' }}>{member.isVerified ? 'Verified' : 'Pending'}</span>
+                    </div>
                   </td>
                   <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                    <button onClick={() => handleEdit(user)} style={{ background: 'none', color: 'var(--text-muted)', padding: '4px', cursor: 'pointer' }}><Edit2 size={16} /></button>
-                    <button onClick={() => promptDelete(user._id)} style={{ background: 'none', color: 'var(--danger)', padding: '4px', marginLeft: '8px', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                      <button onClick={() => handleEdit(member)} style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--bg-sec)', color: 'var(--text-main)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Edit2 size={16} /></button>
+                      <button onClick={() => promptDelete(member._id)} style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.1)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={16} /></button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
+        </div>
       </div>
 
+      {/* Main Registration Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} className="animate-fade-in">
-          <form onSubmit={handleSubmit} className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', padding: '0', scrollbarWidth: 'thin', border: '1px solid rgba(212,175,55,0.2)', background: 'var(--surface)' }}>
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, rgba(212,175,55,0.05), transparent)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }} className="animate-fade-in">
+          <form 
+            onSubmit={handleSubmit} 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '620px', 
+              maxHeight: '90vh', 
+              overflowY: 'auto', 
+              background: 'var(--surface)', 
+              borderRadius: '24px', 
+              border: '1px solid var(--border)', 
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+              position: 'relative'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '32px 40px', borderBottom: '1px solid var(--border)', background: 'linear-gradient(to right, rgba(212,175,55,0.08), transparent)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px' }}>{isEditing ? 'Update Profile' : 'Register New User'}</h2>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>{isEditing ? `Modifying ID: ${selectedUserId}` : 'System Access Generation'}</p>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px' }}>{isEditing ? 'Update Credentials' : 'Member Registration'}</h2>
+                <p style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Global Access Identifier</p>
               </div>
               <button 
                 type="button" 
                 onClick={() => setShowModal(false)} 
-                style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--bg-sec)', color: 'var(--text-main)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
+                style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'var(--bg-sec)', color: 'var(--text-main)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div style={{ padding: '32px' }}>
-              <div className="input-group">
-                <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Full Legal Name</label>
-                <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Alex Johnson" required style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
+            <div style={{ padding: '40px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Full Legal Name</label>
+                <input 
+                  value={formData.name} 
+                  onChange={e => setFormData({...formData, name: e.target.value})} 
+                  placeholder="e.g. Alex Johnson" 
+                  required 
+                  style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} 
+                />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Email Address</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="alex@hms.com" required style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Professional Email</label>
+                  <input 
+                    type="email" 
+                    value={formData.email} 
+                    onChange={e => setFormData({...formData, email: e.target.value})} 
+                    placeholder="alex@glitz.com" 
+                    required 
+                    style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} 
+                  />
                 </div>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Account Password</label>
-                  <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder={isEditing ? "Leave blank to keep" : "Set Secure Password"} required={!isEditing} style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Access Password</label>
+                  <input 
+                    type="password" 
+                    value={formData.password} 
+                    onChange={e => setFormData({...formData, password: e.target.value})} 
+                    placeholder={isEditing ? "••••••••" : "Set Password"} 
+                    required={!isEditing} 
+                    style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} 
+                  />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Contact Number</label>
-                  <input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="9876543210" required style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Primary Contact</label>
+                  <input 
+                    value={formData.phone} 
+                    onChange={e => setFormData({...formData, phone: e.target.value})} 
+                    placeholder="91XXXXXXXX" 
+                    required 
+                    style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} 
+                  />
                 </div>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>System Access Role</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Department Role</label>
                   <select 
                     value={formData.role} 
                     onChange={e => setFormData({...formData, role: e.target.value})} 
                     required
-                    style={{ width: '100%', padding: '14px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)', outline: 'none', appearance: 'none' }}
+                    style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 700, outline: 'none' }}
                   >
                     <option value="subadmin">Sub Admin</option>
                     <option value="reception">Receptionist</option>
@@ -285,31 +340,26 @@ const UserManagement = () => {
                 </div>
               </div>
 
-              <div className="input-group">
-                <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Permanent Address</label>
-                <input value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} placeholder="Sector 12, New Delhi" style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Monthly Salary (₹)</label>
-                  <input type="number" value={formData.salary} onChange={e => setFormData({...formData, salary: e.target.value})} placeholder="15000" style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
-                </div>
-                <div className="input-group">
-                  <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--primary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Aadhar / PAN Ref</label>
-                  <input value={formData.aadhar} onChange={e => setFormData({...formData, aadhar: e.target.value})} placeholder="ID Number" style={{ background: 'var(--bg-sec)', padding: '14px', borderRadius: '12px' }} />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '16px', display: 'block', textTransform: 'uppercase', letterSpacing: '1px' }}>Administrative Privileges</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-sec)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Assigned Operations Permissions</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--bg-sec)', padding: '24px', borderRadius: '18px', border: '1px solid var(--border)' }}>
                   {['Bookings', 'Rooms', 'Finance', 'Analytics', 'System Control'].map(p => (
-                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
-                      <input type="checkbox" checked={formData.permissions.includes(p)} onChange={() => togglePermission(p)} style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }} />
+                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>
+                      <input type="checkbox" checked={formData.permissions.includes(p)} onChange={() => togglePermission(p)} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
                       <span>{p}</span>
                     </label>
                   ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Monthly Salary (₹)</label>
+                  <input type="number" value={formData.salary} onChange={e => setFormData({...formData, salary: e.target.value})} placeholder="Salary Amount" style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Verification Ref (UID)</label>
+                  <input value={formData.aadhar} onChange={e => setFormData({...formData, aadhar: e.target.value})} placeholder="Aadhar/PAN Card" style={{ width: '100%', padding: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 600 }} />
                 </div>
               </div>
 
@@ -317,59 +367,52 @@ const UserManagement = () => {
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)} 
-                  style={{ flex: 1, padding: '16px', borderRadius: '14px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '18px', borderRadius: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 800, fontSize: '15px', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
                   disabled={creating} 
-                  style={{ flex: 2, padding: '16px', borderRadius: '14px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, cursor: 'pointer', boxShadow: '0 4px 15px rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ flex: 2, padding: '18px', borderRadius: '16px', background: 'var(--primary)', border: 'none', color: 'black', fontWeight: 900, fontSize: '16px', cursor: 'pointer', boxShadow: '0 8px 25px rgba(212, 175, 55, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  {creating ? <Loader2 className="animate-spin" size={20} /> : (isEditing ? 'Update Records' : 'Register Member')}
+                  {creating ? <Loader2 className="animate-spin" size={24} /> : (isEditing ? 'Commit Changes' : 'Finalize Registration')}
                 </button>
               </div>
             </div>
           </form>
         </div>
       )}
-      {/* Toast Notification */}
-      {toast.show && (
-        <div style={{ 
-          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', 
-          background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)', 
-          color: 'white', padding: '12px 24px', borderRadius: '12px', fontWeight: 800, 
-          zIndex: 2000, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', display: 'flex', 
-          alignItems: 'center', gap: '10px' 
-        }}>
-          {toast.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
-          {toast.message}
-        </div>
-      )}
-      {/* Confirm Deletion Modal */}
+
+      {/* Confirmation Modal */}
       {confirmModal.show && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '20px' }} className="animate-fade-in">
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '40px', textAlign: 'center', background: 'var(--surface)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 8px 20px rgba(239, 68, 68, 0.1)' }}>
-              <Trash2 size={40} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '20px' }}>
+          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '420px', padding: '48px', textAlign: 'center', background: 'var(--surface)', borderRadius: '28px' }}>
+            <div style={{ width: '84px', height: '84px', borderRadius: '24px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+              <Trash2 size={42} />
             </div>
-            <h3 style={{ marginBottom: '12px', fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>{confirmModal.title}</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '36px', lineHeight: 1.6, fontSize: '14px', fontWeight: 500 }}>{confirmModal.message}</p>
+            <h3 style={{ marginBottom: '12px', fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)' }}>Final Deletion</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6, fontWeight: 500 }}>This will permanently terminate the system access for this member. Are you absolutely certain?</p>
             <div style={{ display: 'flex', gap: '16px' }}>
-              <button 
-                onClick={() => setConfirmModal({ ...confirmModal, show: false })} 
-                style={{ flex: 1, padding: '16px', borderRadius: '14px', background: 'var(--bg-sec)', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' }}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDelete} 
-                style={{ flex: 1, padding: '14px', borderRadius: '14px', background: 'var(--danger)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 900, boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)' }}
-              >
-                Delete
-              </button>
+              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'var(--bg-sec)', border: '1px solid var(--border)', color: 'var(--text-main)', fontWeight: 800, cursor: 'pointer' }}>Hold Back</button>
+              <button onClick={confirmDelete} style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'var(--danger)', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)' }}>Confirm</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast System */}
+      {toast.show && (
+        <div style={{ 
+          position: 'fixed', bottom: '40px', left: '50%', transform: 'translateX(-50%)', 
+          background: toast.type === 'error' ? 'var(--danger)' : 'var(--text-main)', 
+          color: toast.type === 'error' ? 'white' : 'var(--bg-main)', 
+          padding: '16px 32px', borderRadius: '20px', fontWeight: 900, 
+          zIndex: 4000, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex', 
+          alignItems: 'center', gap: '14px', border: '1px solid rgba(255,255,255,0.1)' 
+        }} className="animate-fade-in">
+          {toast.type === 'error' ? <AlertCircle size={22} /> : <CheckCircle size={22} color="var(--primary)" />}
+          {toast.message}
         </div>
       )}
     </div>
