@@ -81,7 +81,7 @@ const Housekeeping = () => {
             
             <button 
               onClick={() => updateStatus(room._id, 'Cleaning')}
-              style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '8px', color: 'var(--warning)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '13px' }}
+              style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '13px' }}
             >
               <Clock size={14} /> Internal Cleaning Order
             </button>

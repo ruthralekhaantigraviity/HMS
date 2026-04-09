@@ -237,9 +237,7 @@ const Summary = () => {
 
   const getRoomCardStyle = (status) => {
     switch (status) {
-      case 'Available': return { bg: 'rgba(16, 185, 129, 0.1)', dot: 'var(--success)', text: 'var(--success)', border: 'rgba(16, 185, 129, 0.2)' };
-      case 'Maintenance': return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
-      case 'Cleaning': return { bg: 'rgba(234, 179, 8, 0.1)', dot: '#eab308', text: '#ca8a04', border: 'rgba(234, 179, 8, 0.2)' };
+      case 'Cleaning': return { bg: 'rgba(59, 130, 246, 0.1)', dot: '#3b82f6', text: '#2563eb', border: 'rgba(59, 130, 246, 0.2)' };
       case 'Occupied': return { bg: 'rgba(239, 68, 68, 0.1)', dot: 'var(--danger)', text: 'var(--danger)', border: 'rgba(239, 68, 68, 0.2)' };
       default: return { bg: 'var(--bg-sec)', dot: 'var(--text-muted)', text: 'var(--text-muted)', border: 'var(--border)' };
     }
