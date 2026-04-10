@@ -41,7 +41,7 @@ const Reports = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
 
   return (
-    <div className="animate-fade-in">
+    <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1>Basic Reports</h1>
@@ -133,10 +133,36 @@ const Reports = () => {
         </table>
       </div>
 
-      {/* Historical Details Modal */}
       {selectedRecord && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '550px', 
+              padding: '0', 
+              overflow: 'hidden', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -73,7 +73,7 @@ const Services = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1>Hotel Services</h1>
@@ -121,8 +121,34 @@ const Services = () => {
       )}
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px', 
+              padding: '40px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2>{formData._id ? 'Edit Service' : 'Add New Service'}</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={20} /></button>
@@ -163,8 +189,34 @@ const Services = () => {
       )}
       {/* Confirm Deletion Modal */}
       {confirmModal.show && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
-          <div className="glass-card animate-scale-in" style={{ width: '400px', padding: '32px', textAlign: 'center' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.4)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '400px', 
+              padding: '48px', 
+              textAlign: 'center', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
               <Trash2 size={32} />
             </div>

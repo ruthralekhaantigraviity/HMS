@@ -260,7 +260,7 @@ const Summary = () => {
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}><Loader2 className="animate-spin" /> Syncing Global Data...</div>;
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '100px' }}>
+    <div style={{ position: 'relative', paddingBottom: '100px' }}>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         <StatCard title="Today's Bookings" value={stats.bookings.day} subtext="New Check-ins" icon={Calendar} />
@@ -384,8 +384,35 @@ const Summary = () => {
       )}
 
       {showIssueModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001, backdropFilter: 'blur(15px)', padding: '20px' }}>
-          <form onSubmit={handleReportIssue} className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '32px', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <form 
+            onSubmit={handleReportIssue} 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '500px', 
+              padding: '40px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Plus size={24} color="#d4af37" />
@@ -465,8 +492,36 @@ const Summary = () => {
       )}
       {/* Guest Information / Room QuickView Modal */}
       {selectedFacilities && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(10px)', padding: '20px' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', position: 'relative', background: 'var(--surface)', minHeight: '400px' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '550px', 
+              padding: '0', 
+              overflow: 'hidden', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative',
+              minHeight: '400px'
+            }}
+          >
             {/* Header section */}
             <div style={{ padding: '24px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
               <button 
@@ -597,11 +652,37 @@ const Summary = () => {
         </div>
       )}
 
-      {/* 🚀 ENHANCED MULTI-STAGE CHECKOUT MODAL */}
       {checkoutBooking && (
         <>
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 11000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+          <div style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            background: 'rgba(255, 255, 255, 0.3)', 
+            backdropFilter: 'blur(15px)', 
+            WebkitBackdropFilter: 'blur(15px)',
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 9999, 
+            padding: '40px' 
+          }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '550px', 
+              padding: '0', 
+              overflow: 'hidden', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             
             {/* Modal Header */}
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

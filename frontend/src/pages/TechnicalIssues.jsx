@@ -80,7 +80,7 @@ const TechnicalIssues = () => {
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}><Loader2 className="animate-spin" /> Fetching technical reports...</div>;
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '100px' }}>
+    <div style={{ position: 'relative', paddingBottom: '100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 900 }}>Technical Issues</h1>
@@ -145,8 +145,35 @@ const TechnicalIssues = () => {
       </div>
 
       {showIssueModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)', padding: '20px' }}>
-          <form onSubmit={handleReportIssue} className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '32px', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <form 
+            onSubmit={handleReportIssue} 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '500px', 
+              padding: '40px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'center' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Plus size={24} color="#d4af37" />
