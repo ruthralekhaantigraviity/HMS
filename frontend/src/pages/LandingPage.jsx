@@ -201,7 +201,7 @@ const LandingPage = () => {
 
       {/* Signature Rooms Showcase (Replacing Dining) */}
       <section className="featured-rooms-showcase">
-        <div style={{ padding: '100px 5%', background: 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("/assets/images/room1.png")', backgroundSize: 'cover', backgroundAttachment: 'fixed', textAlign: 'center', color: 'white' }}>
+        <div style={{ position: 'relative', padding: '100px 0', background: 'linear-gradient(rgba(10, 10, 10, 0.8), rgba(20, 15, 0, 0.9)), url("/assets/images/rooms/suite.jpg")', backgroundSize: 'cover', backgroundAttachment: 'fixed', textAlign: 'center', color: 'white' }}>
           <span style={{ color: 'var(--primary)', fontWeight: '600', letterSpacing: '2px' }}>SIGNATURE COLLECTION</span>
           <h2 style={{ fontSize: '3.5rem', margin: '1rem 0' }}>The Glitz Presidential Suites</h2>
           <p style={{ maxWidth: '800px', margin: '0 auto 3rem', fontSize: '1.1rem', opacity: '0.8', lineHeight: '1.8' }}>
@@ -214,7 +214,7 @@ const LandingPage = () => {
               { name: 'Glitz Grand Suite', price: '850', features: ['Personal Gym', 'Home Theater', 'Spa Bathroom'], image: '/assets/images/room2.png' },
               { name: 'Royal Executive', price: '950', features: ['Conference Room', 'Chef Service', 'Master Bedroom'], image: '/assets/images/room1.png' }
             ].map((suite, idx) => (
-              <div key={idx} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>
+              <div key={idx} style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>
                 <img src={suite.image} alt={suite.name} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '10px', marginBottom: '1.5rem' }} />
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{suite.name}</h3>
                 <p style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '1.25rem', marginBottom: '1rem' }}>${suite.price} <span style={{ fontSize: '12px', fontWeight: '400', opacity: 0.7 }}>/ night</span></p>

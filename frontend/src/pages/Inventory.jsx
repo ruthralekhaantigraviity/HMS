@@ -79,7 +79,7 @@ const Inventory = () => {
           <h1>Inventory Management</h1>
           <p style={{ color: 'var(--text-muted)' }}>Track room supplies, linens, and minibar consumables.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ borderRadius: 0 }}>
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ borderRadius: '12px' }}>
           <Plus size={18} /> Update Stock
         </button>
       </div>
@@ -153,7 +153,7 @@ const Inventory = () => {
                   </div>
                 </td>
                 <td style={{ padding: '20px 24px' }}>
-                  <span style={{ padding: '4px 8px', borderRadius: '0', background: 'rgba(255,255,255,0.05)', fontSize: '11px', border: '1px solid var(--border)' }}>{item.category}</span>
+                  <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', fontSize: '11px', border: '1px solid var(--border)' }}>{item.category}</span>
                 </td>
                 <td style={{ padding: '20px 24px' }}>
                   <span style={{ fontWeight: 700, color: item.status === 'In Stock' ? 'white' : 'var(--danger)' }}>
@@ -167,7 +167,7 @@ const Inventory = () => {
                      fontSize: '11px', fontWeight: 800, 
                      color: item.status === 'Restock Required' ? 'var(--danger)' : item.status === 'Low Stock' ? 'var(--warning)' : 'var(--success)',
                      background: item.status === 'Restock Required' ? 'rgba(239, 68, 68, 0.1)' : item.status === 'Low Stock' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                     padding: '4px 10px', borderRadius: '0', border: '1px solid currentColor', width: 'fit-content'
+                     padding: '4px 10px', borderRadius: '8px', border: '1px solid currentColor', width: 'fit-content'
                    }}>
                      {item.status === 'In Stock' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
                      {item.status.toUpperCase()}
@@ -200,9 +200,9 @@ const Inventory = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -230,13 +230,13 @@ const Inventory = () => {
             
             <div className="input-group">
               <label>ITEM NAME</label>
-              <input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Luxury Hand Soap" required style={{ borderRadius: 0 }} />
+              <input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Luxury Hand Soap" required style={{ borderRadius: '12px' }} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="input-group">
                 <label>CATEGORY</label>
-                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '0', color: 'var(--text-main)' }}>
+                <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}>
                   <option value="Linen">Linen</option>
                   <option value="Toiletries">Toiletries</option>
                   <option value="Minibar">Minibar</option>
@@ -246,22 +246,22 @@ const Inventory = () => {
               </div>
               <div className="input-group">
                 <label>UNIT</label>
-                <input value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})} placeholder="pcs / bottles / units" required style={{ borderRadius: 0 }} />
+                <input value={formData.unit} onChange={(e) => setFormData({...formData, unit: e.target.value})} placeholder="pcs / bottles / units" required style={{ borderRadius: '12px' }} />
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="input-group">
                 <label>CURRENT STOCK</label>
-                <input type="number" value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} placeholder="0" required style={{ borderRadius: 0 }} />
+                <input type="number" value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} placeholder="0" required style={{ borderRadius: '12px' }} />
               </div>
               <div className="input-group">
                 <label>MIN STOCK LEVEL</label>
-                <input type="number" value={formData.minStock} onChange={(e) => setFormData({...formData, minStock: e.target.value})} placeholder="10" required style={{ borderRadius: 0 }} />
+                <input type="number" value={formData.minStock} onChange={(e) => setFormData({...formData, minStock: e.target.value})} placeholder="10" required style={{ borderRadius: '12px' }} />
               </div>
             </div>
 
-            <button type="submit" disabled={creating} className="btn btn-primary" style={{ width: '100%', padding: '14px', marginTop: '12px', borderRadius: 0 }}>
+            <button type="submit" disabled={creating} className="btn btn-primary" style={{ width: '100%', padding: '14px', marginTop: '12px', borderRadius: '12px' }}>
               {creating ? <Loader2 className="animate-spin" size={18} /> : 'Synchronize Registry'}
             </button>
           </form>

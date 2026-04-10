@@ -103,7 +103,7 @@ const StaffPayouts = () => {
 
       {/* Payslip Modal (Re-using the same high-fidelity design) */}
       {selectedPayout && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={() => setSelectedPayout(null)}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--glass-overlay)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={() => setSelectedPayout(null)}>
            <div 
              className="animate-slide-up" 
              style={{ background: '#fff', color: '#1a1a1a', width: '100%', maxWidth: '700px', padding: '60px', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} 

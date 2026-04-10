@@ -120,7 +120,7 @@ const Reports = () => {
                       border: '1px solid var(--primary)', 
                       color: 'var(--primary)', 
                       background: 'transparent', 
-                      borderRadius: '6px', 
+                      borderRadius: '12px', 
                       cursor: 'pointer'
                     }}
                   >
@@ -140,9 +140,9 @@ const Reports = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 

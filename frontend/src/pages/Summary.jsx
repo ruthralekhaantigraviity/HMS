@@ -374,11 +374,12 @@ const Summary = () => {
 
       {/* Modals */}
       {confirmRoom && (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
-          <div className="glass-card" style={{ width: '100%', maxWidth: '400px', padding: '32px', textAlign: 'center' }}>
-             <h3>Room {confirmRoom.roomNumber} Ready?</h3>
-             <button onClick={handleMarkAvailable} className="btn btn-primary" style={{ width: '100%', marginTop: '24px' }}>Yes, Set Available</button>
-             <button onClick={() => setConfirmRoom(null)} className="btn" style={{ width: '100%', marginTop: '12px' }}>Cancel</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }} className="animate-fade-in">
+          <div className="animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '40px', textAlign: 'center', background: '#ffffff', borderRadius: '32px', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)' }}>
+             <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '16px' }}>Room {confirmRoom.roomNumber} Ready?</h3>
+             <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>This will mark the room as available for new check-ins.</p>
+             <button onClick={handleMarkAvailable} className="btn btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '12px', fontWeight: 900, background: 'var(--primary)', color: 'black', border: 'none', cursor: 'pointer', marginBottom: '12px' }}>Yes, Set Available</button>
+             <button onClick={() => setConfirmRoom(null)} className="btn" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       )}
@@ -390,9 +391,9 @@ const Summary = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -438,10 +439,10 @@ const Summary = () => {
       )}
 
       {showAddRoomModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
-          <form onSubmit={handleCreateRoom} className="glass-card" style={{ position: 'relative', width: '100%', maxWidth: '400px', padding: '32px', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+          <form onSubmit={handleCreateRoom} className="animate-scale-in" style={{ position: 'relative', width: '100%', maxWidth: '450px', padding: '40px', background: '#ffffff', borderRadius: '32px', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
             {isUpdating && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
                 <Loader2 className="animate-spin" size={48} color="var(--primary)" />
                 <span style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Processing Room...</span>
               </div>
@@ -498,9 +499,9 @@ const Summary = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -660,9 +661,9 @@ const Summary = () => {
             left: 0, 
             right: 0, 
             bottom: 0, 
-            background: 'rgba(255, 255, 255, 0.3)', 
-            backdropFilter: 'blur(15px)', 
-            WebkitBackdropFilter: 'blur(15px)',
+            background: 'var(--glass-overlay)', 
+            backdropFilter: 'blur(20px)', 
+            WebkitBackdropFilter: 'blur(20px)',
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 

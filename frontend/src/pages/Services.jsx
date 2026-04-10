@@ -127,9 +127,9 @@ const Services = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -164,7 +164,7 @@ const Services = () => {
               </div>
               <div className="input-group">
                 <label>Category</label>
-                <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}>
+                <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)', outline: 'none' }}>
                   <option value="Food">Food & Dining</option>
                   <option value="Comfort">Comfort & Stay</option>
                   <option value="Tech">Technology</option>
@@ -174,7 +174,7 @@ const Services = () => {
               </div>
               <div className="input-group">
                 <label>Icon Identifier</label>
-                <select value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)' }}>
+                <select value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} style={{ padding: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text-main)', outline: 'none' }}>
                   <option value="Utensils">Food Icon</option>
                   <option value="Zap">Zap Icon</option>
                   <option value="Coffee">Coffee Icon</option>
@@ -195,7 +195,7 @@ const Services = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.4)', 
+          background: 'var(--glass-overlay)', 
           backdropFilter: 'blur(20px)', 
           WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 

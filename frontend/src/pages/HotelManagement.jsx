@@ -155,12 +155,12 @@ const HotelManagement = () => {
           <p style={{ color: 'var(--text-muted)' }}>Configure rooms, categories, and pricing setup.</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-primary" onClick={() => setShowPricingModal(true)} style={{ borderRadius: '0' }}>
+          <button className="btn btn-primary" onClick={() => setShowPricingModal(true)} style={{ borderRadius: '12px' }}>
             <Settings size={18} /> Pricing Setup
           </button>
           <button 
             className="btn" 
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '0' }}
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '12px' }}
             onClick={() => { setIsEditing(false); setShowAddModal(true); }}
           >
             <Plus size={18} /> Add Room
@@ -276,9 +276,9 @@ const HotelManagement = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -323,14 +323,14 @@ const HotelManagement = () => {
                       <input 
                         type="number" 
                         placeholder="Rate"
-                        style={{ height: '40px', borderRadius: 0 }}
+                        style={{ height: '40px', borderRadius: '8px' }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleBulkUpdate('AC', type, e.target.value);
                         }}
                       />
                       <button 
                         className="btn btn-primary" 
-                        style={{ padding: '0 12px', borderRadius: 0, height: '40px' }}
+                        style={{ padding: '0 12px', borderRadius: '8px', height: '40px' }}
                         onClick={(e) => {
                            const val = e.currentTarget.parentElement.querySelector('input').value;
                            handleBulkUpdate('AC', type, val);
@@ -353,14 +353,14 @@ const HotelManagement = () => {
                       <input 
                         type="number" 
                         placeholder="Rate"
-                        style={{ height: '40px', borderRadius: 0 }}
+                        style={{ height: '40px', borderRadius: '8px' }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleBulkUpdate('NON-AC', type, e.target.value);
                         }}
                       />
                       <button 
                         className="btn btn-primary" 
-                        style={{ padding: '0 12px', borderRadius: 0, height: '40px' }}
+                        style={{ padding: '0 12px', borderRadius: '8px', height: '40px' }}
                         onClick={(e) => {
                            const val = e.currentTarget.parentElement.querySelector('input').value;
                            handleBulkUpdate('NON-AC', type, val);
@@ -373,7 +373,7 @@ const HotelManagement = () => {
             </div>
 
             <div style={{ borderTop: '1px solid var(--border)', marginTop: '24px', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-               <button className="btn" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: 0 }} onClick={() => setShowPricingModal(false)}>Close Setup</button>
+               <button className="btn" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '12px' }} onClick={() => setShowPricingModal(false)}>Close Setup</button>
             </div>
           </div>
         </div>
@@ -386,9 +386,9 @@ const HotelManagement = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -410,7 +410,7 @@ const HotelManagement = () => {
             }}
           >
             {creating && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '16px' }}>
                 <Loader2 className="animate-spin" size={48} color="var(--primary)" />
                 <span style={{ color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Processing Registration...</span>
               </div>
@@ -423,11 +423,11 @@ const HotelManagement = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="input-group">
                 <label>Room Number</label>
-                <input name="roomNumber" value={formData.roomNumber} onChange={handleChange} placeholder="e.g. 101" required style={{ borderRadius: 0 }} />
+                <input name="roomNumber" value={formData.roomNumber} onChange={handleChange} placeholder="e.g. 101" required style={{ borderRadius: '12px' }} />
               </div>
               <div className="input-group">
                 <label>Floor</label>
-                <input name="floor" type="number" value={formData.floor} onChange={handleChange} placeholder="e.g. 1" required style={{ borderRadius: 0 }} />
+                <input name="floor" type="number" value={formData.floor} onChange={handleChange} placeholder="e.g. 1" required style={{ borderRadius: '12px' }} />
               </div>
             </div>
 
@@ -456,8 +456,8 @@ const HotelManagement = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-              <button type="button" onClick={() => setShowAddModal(false)} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: 0 }}>Cancel</button>
-              <button type="submit" disabled={creating} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', borderRadius: 0 }}>
+              <button type="button" onClick={() => setShowAddModal(false)} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '12px' }}>Cancel</button>
+              <button type="submit" disabled={creating} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', borderRadius: '12px' }}>
                 {creating ? <Loader2 className="animate-spin" size={18} /> : (isEditing ? 'Update Room' : 'Create Room')}
               </button>
             </div>
@@ -472,7 +472,7 @@ const HotelManagement = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.4)', 
+          background: 'var(--glass-overlay)', 
           backdropFilter: 'blur(20px)', 
           WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
@@ -500,8 +500,8 @@ const HotelManagement = () => {
             <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>{confirmModal.title}</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>{confirmModal.message}</p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', justifyContent: 'center', borderRadius: '0' }}>Cancel</button>
-              <button onClick={confirmDeleteRoom} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', border: 'none', justifyContent: 'center', fontWeight: 800, borderRadius: '0' }}>Confirm Delete</button>
+              <button onClick={() => setConfirmModal({ ...confirmModal, show: false })} className="btn" style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-main)', justifyContent: 'center', borderRadius: '12px' }}>Cancel</button>
+              <button onClick={confirmDeleteRoom} className="btn" style={{ flex: 1, background: 'var(--danger)', color: 'white', border: 'none', justifyContent: 'center', fontWeight: 800, borderRadius: '12px' }}>Confirm Delete</button>
             </div>
           </div>
         </div>

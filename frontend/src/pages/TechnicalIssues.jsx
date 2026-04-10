@@ -90,7 +90,7 @@ const TechnicalIssues = () => {
           onClick={() => setShowIssueModal(true)}
           style={{ 
             display: 'flex', alignItems: 'center', gap: '8px', 
-            padding: '12px 28px', borderRadius: '30px', 
+            padding: '12px 28px', borderRadius: '12px', 
             fontSize: '14px', fontWeight: 900, 
             background: '#d4af37', color: 'white', 
             border: 'none', cursor: 'pointer',
@@ -151,9 +151,9 @@ const TechnicalIssues = () => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'rgba(255, 255, 255, 0.3)', 
-          backdropFilter: 'blur(15px)', 
-          WebkitBackdropFilter: 'blur(15px)',
+          background: 'var(--glass-overlay)', 
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
@@ -191,7 +191,7 @@ const TechnicalIssues = () => {
                   required 
                />
             </div>
-            <button type="submit" disabled={isUpdating} style={{ width: '100%', height: '56px', background: '#d4af37', border: 'none', borderRadius: '16px', color: 'black', fontWeight: 900, fontSize: '16px', cursor: 'pointer', transition: '0.2s' }}>
+            <button type="submit" disabled={isUpdating} style={{ width: '100%', height: '56px', background: '#d4af37', border: 'none', borderRadius: '12px', color: 'black', fontWeight: 900, fontSize: '16px', cursor: 'pointer', transition: '0.2s' }}>
                {isUpdating ? 'Submitting...' : 'Submit to Management'}
             </button>
           </form>
