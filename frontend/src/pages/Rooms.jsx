@@ -220,7 +220,7 @@ const Rooms = () => {
                         padding: '16px', 
                         textAlign: 'center', 
                         position: 'relative', 
-                        background: 'var(--surface)', 
+                        background: style.bg, 
                         border: `1px solid ${style.border}`,
                         borderRadius: '16px',
                         transition: '0.3s ease'
