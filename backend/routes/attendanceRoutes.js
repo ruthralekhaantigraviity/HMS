@@ -9,7 +9,7 @@ router.post('/', protect, authorize('superadmin', 'subadmin'), attendanceControl
 
 // @route   GET api/attendance/today
 // @desc    Get all attendance records for today (SuperAdmin/SubAdmin only)
-router.get('/today', protect, authorize('superadmin', 'subadmin'), attendanceController.getTodayAttendance);
+router.get('/today', protect, authorize('superadmin', 'subadmin', 'reception'), attendanceController.getTodayAttendance);
 
 // @route   GET api/attendance/date/:date
 // @desc    Get all attendance records for a specific date

@@ -15,7 +15,7 @@ router.put('/:id/add-service', protect, authorize('reception', 'superadmin', 'su
 router.put('/:id/extend', protect, authorize('reception', 'superadmin', 'subadmin'), bookingController.extendStay);
 router.put('/:id/check-out', protect, authorize('reception', 'superadmin', 'subadmin'), bookingController.checkOut);
 router.get('/active', protect, bookingController.getActiveBookings);
-router.get('/summary', protect, authorize('superadmin'), bookingController.getBookingSummary);
+router.get('/summary', protect, authorize('superadmin', 'subadmin', 'reception'), bookingController.getBookingSummary);
 
 // Room Service Tasks
 router.get('/services/pending', protect, bookingController.getPendingServices);

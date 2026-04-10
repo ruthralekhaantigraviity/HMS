@@ -8,7 +8,7 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 router.post('/register', protect, authorize('superadmin', 'subadmin'), authController.register);
 
 // Get All Users (For the Dashboard)
-router.get('/', protect, authorize('superadmin', 'subadmin'), authController.getUsers);
+router.get('/', protect, authorize('superadmin', 'subadmin', 'reception'), authController.getUsers);
 
 // Login (Step 1)
 router.post('/login', authController.login);
