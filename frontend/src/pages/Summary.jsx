@@ -236,11 +236,12 @@ const Summary = () => {
     if (!targetRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`/api/rooms/${targetRoom._id}`, { status: 'Available' });
+      const res = await axios.put(`/api/rooms/${targetRoom._id}`, { status: 'Available' });
       fetchStats();
       setConfirmRoom(null);
+      toast.success(res.data.msg || `Room ${targetRoom.roomNumber} is now Available`);
     } catch (err) {
-      alert('Error room status');
+      toast.error(err.response?.data?.msg || 'Error updating room status');
     } finally {
       setIsUpdating(false);
     }

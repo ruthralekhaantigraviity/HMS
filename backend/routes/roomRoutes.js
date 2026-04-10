@@ -8,7 +8,7 @@ router.get('/', protect, roomController.getRooms);
 
 // Add, Update, Delete (Restricted to Admins & Reception for initial setup)
 router.post('/', protect, authorize('superadmin', 'subadmin', 'reception'), roomController.addRoom);
-router.put('/:id', protect, authorize('superadmin', 'subadmin'), roomController.updateRoom);
+router.put('/:id', protect, authorize('superadmin', 'subadmin', 'reception'), roomController.updateRoom);
 router.delete('/:id', protect, authorize('superadmin', 'subadmin'), roomController.deleteRoom);
 
 module.exports = router;

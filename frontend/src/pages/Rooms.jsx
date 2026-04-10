@@ -70,7 +70,7 @@ const Rooms = () => {
       setSelectedRoom(null);
       toast.success(`Room ${targetRoom.roomNumber} is now Available`);
     } catch (err) {
-      toast.error('Error updating room status');
+      toast.error(err.response?.data?.msg || 'Error updating room status');
     } finally {
       setIsUpdating(false);
     }
