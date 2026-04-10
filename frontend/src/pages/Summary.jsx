@@ -232,7 +232,8 @@ const Summary = () => {
   };
 
   const handleMarkAvailable = async (targetOverride = null) => {
-    const targetRoom = targetOverride || confirmRoom;
+    // If targetOverride is an event object (it won't have _id), ignore it and use confirmRoom
+    const targetRoom = (targetOverride && targetOverride._id) ? targetOverride : confirmRoom;
     if (!targetRoom) return;
     try {
       setIsUpdating(true);
@@ -384,7 +385,7 @@ const Summary = () => {
           <div className="animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '40px', textAlign: 'center', background: '#ffffff', borderRadius: '32px', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)' }}>
              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '16px' }}>Room {confirmRoom.roomNumber} Ready?</h3>
              <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>This will mark the room as available for new check-ins.</p>
-             <button onClick={handleMarkAvailable} className="btn btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '12px', fontWeight: 900, background: 'var(--primary)', color: 'black', border: 'none', cursor: 'pointer', marginBottom: '12px' }}>Yes, Set Available</button>
+             <button onClick={() => handleMarkAvailable()} className="btn btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '12px', fontWeight: 900, background: 'var(--primary)', color: 'black', border: 'none', cursor: 'pointer', marginBottom: '12px' }}>Yes, Set Available</button>
              <button onClick={() => setConfirmRoom(null)} className="btn" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
