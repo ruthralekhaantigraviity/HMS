@@ -231,11 +231,12 @@ const Summary = () => {
     }
   };
 
-  const handleMarkAvailable = async () => {
-    if (!confirmRoom) return;
+  const handleMarkAvailable = async (targetOverride = null) => {
+    const targetRoom = targetOverride || confirmRoom;
+    if (!targetRoom) return;
     try {
       setIsUpdating(true);
-      await axios.put(`/api/rooms/${confirmRoom._id}`, { status: 'Available' });
+      await axios.put(`/api/rooms/${targetRoom._id}`, { status: 'Available' });
       fetchStats();
       setConfirmRoom(null);
     } catch (err) {
@@ -311,12 +312,16 @@ const Summary = () => {
                   borderRadius: '16px'
                 }} 
                 onClick={() => {
-                  const lookupRoom = (room.roomNumber || '').toString();
-                  const booking = activeBookings.find(b => 
-                    (b.room?.roomNumber?.toString() === lookupRoom) || 
-                    (b.room === room._id)
-                  );
-                  setSelectedFacilities(booking ? { ...booking, room } : room);
+                  if (room.status === 'Cleaning' || room.status === 'Maintenance') {
+                    setConfirmRoom(room);
+                  } else {
+                    const lookupRoom = (room.roomNumber || '').toString();
+                    const booking = activeBookings.find(b => 
+                      (b.room?.roomNumber?.toString() === lookupRoom) || 
+                      (b.room === room._id)
+                    );
+                    setSelectedFacilities(booking ? { ...booking, room } : room);
+                  }
                 }}
               >
                 {/* Top Section */}
@@ -638,7 +643,8 @@ const Summary = () => {
                       if (selectedFacilities.status === 'Available') {
                         navigate('/dashboard/enroll', { state: { roomNumber: selectedFacilities.roomNumber || selectedFacilities.room?.roomNumber } });
                       } else {
-                        handleMarkAvailable(selectedFacilities);
+                        // Pass the room object for non-booking results, or use the nested room from booking
+                        handleMarkAvailable(selectedFacilities.room || selectedFacilities);
                       }
                       setSelectedFacilities(null);
                     }}
