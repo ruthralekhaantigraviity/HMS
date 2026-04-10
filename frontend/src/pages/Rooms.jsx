@@ -220,7 +220,7 @@ const Rooms = () => {
                         padding: '16px', 
                         textAlign: 'center', 
                         position: 'relative', 
-                        background: style.bg, 
+                        background: 'var(--surface)', 
                         border: `1px solid ${style.border}`,
                         borderRadius: '16px',
                         transition: '0.3s ease'
@@ -295,7 +295,7 @@ const Rooms = () => {
       {/* Confirmation Modal */}
       {confirmRoom && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--glass-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }} className="animate-fade-in">
-          <div className="animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '40px', textAlign: 'center', background: '#ffffff', borderRadius: '32px', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)' }}>
+          <div className="animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '40px', textAlign: 'center', background: 'var(--surface)', borderRadius: '32px', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)' }}>
              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '16px' }}>Room {confirmRoom.roomNumber} Ready?</h3>
              <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>This will mark the room as available for new check-ins.</p>
               <button 
@@ -334,7 +334,7 @@ const Rooms = () => {
               width: '100%', 
               maxWidth: '450px', 
               padding: '40px', 
-              background: '#ffffff', 
+              background: 'var(--surface)', 
               borderRadius: '32px', 
               border: '1px solid rgba(212, 175, 55, 0.4)', 
               boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
@@ -428,7 +428,7 @@ const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, lo
           maxWidth: '600px', 
           maxHeight: '90vh',
           overflowY: 'auto', 
-          background: '#ffffff', 
+          background: 'var(--surface)', 
           borderRadius: '32px', 
           border: '1px solid rgba(212,175,55,0.4)', 
           boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',

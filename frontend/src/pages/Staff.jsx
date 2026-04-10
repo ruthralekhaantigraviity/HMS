@@ -44,7 +44,7 @@ const StaffDetailModal = ({ staff, onClose }) => {
           width: '100%', 
           maxHeight: '90vh',
           overflowY: 'auto', 
-          background: '#ffffff', 
+          background: 'var(--surface)', 
           borderRadius: '32px', 
           border: '1px solid rgba(212, 175, 55, 0.4)', 
           boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
