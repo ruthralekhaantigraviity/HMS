@@ -42,6 +42,7 @@ const Rooms = () => {
   const fetchRooms = async () => {
     try {
       if (!token) return;
+      setLoading(true);
       const results = await Promise.allSettled([
         axios.get('/api/rooms'),
         axios.get('/api/bookings/active')
@@ -52,8 +53,14 @@ const Rooms = () => {
       
       setRooms(Array.isArray(rData) ? rData : []);
       setActiveBookings(Array.isArray(bData) ? bData : []);
+      
+      // Success feedback for manual refresh
+      if (rooms.length > 0) {
+        toast.success("Room status updated successfully!");
+      }
     } catch (err) {
       console.error('Fetch error:', err);
+      toast.error("Failed to refresh room data.");
     } finally {
       setLoading(false);
     }
