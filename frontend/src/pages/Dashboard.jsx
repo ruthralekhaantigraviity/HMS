@@ -281,10 +281,28 @@ const Dashboard = () => {
               </button>
 
               {showNotifications && (
-                <div className="glass-card animate-fade-in" style={{ position: 'absolute', top: '45px', right: '0', width: '320px', padding: '16px', zIndex: 100, border: '1px solid var(--border)', maxHeight: '400px', overflowY: 'auto' }}>
+                <div 
+                  className="animate-fade-in" 
+                  style={{ 
+                    position: 'absolute', 
+                    top: '45px', 
+                    right: '0', 
+                    width: '320px', 
+                    padding: '16px', 
+                    zIndex: 100, 
+                    background: isDarkMode ? 'rgba(18, 18, 18, 0.98)' : 'rgba(255, 255, 255, 0.98)', 
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    borderRadius: '24px',
+                    border: '1px solid var(--border)', 
+                    maxHeight: '400px', 
+                    overflowY: 'auto',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
+                  }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 800 }}>Stay-Expiry Alerts</h4>
-                    <span style={{ fontSize: '10px', color: 'var(--primary)' }}>Real-time Monitoring</span>
+                    <h4 style={{ fontSize: '14px', fontWeight: 900 }}>Stay-Expiry Alerts</h4>
+                    <span style={{ fontSize: '10px', color: 'var(--primary)', fontWeight: 800 }}>Real-time Monitoring</span>
                   </div>
                   
                   {notifications.length === 0 ? (
@@ -307,12 +325,14 @@ const Dashboard = () => {
                             display: 'flex', 
                             alignItems: 'center', 
                             gap: '12px', 
-                            padding: '12px', 
-                            background: n.type === 'expiry' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
-                            borderRadius: '12px', 
-                            borderLeft: `4px solid ${n.type === 'expiry' ? 'var(--danger)' : 'var(--success)'}`,
+                            padding: '14px', 
+                            background: n.type === 'expiry' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)', 
+                            borderRadius: '16px', 
+                            border: `1px solid ${n.type === 'expiry' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
+                            borderLeft: `5px solid ${n.type === 'expiry' ? 'var(--danger)' : 'var(--success)'}`,
                             cursor: 'pointer',
-                            transition: 'var(--transition)'
+                            transition: 'var(--transition)',
+                            marginBottom: '4px'
                           }}
                           className="hover-card"
                         >
@@ -325,10 +345,12 @@ const Dashboard = () => {
                             {n.type === 'expiry' ? <Clock size={16} /> : <UserPlus size={16} />}
                           </div>
                           <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                              <p style={{ fontSize: '13px', fontWeight: 800 }}>Room {n.room}</p>
-                              <span style={{ fontSize: '10px', opacity: 0.6 }}>{n.type === 'expiry' ? 'Checkout' : 'New Guest'}</span>
-                            </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                                  <p style={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)' }}>Room {n.room}</p>
+                                </div>
+                                <span style={{ fontSize: '10px', opacity: 0.8, color: 'var(--text-muted)', fontWeight: 700 }}>{n.type === 'expiry' ? 'CHECKOUT' : 'NEW CHECKIN'}</span>
+                              </div>
                             <p style={{ fontSize: '11px', color: 'var(--text-main)', fontWeight: 600 }}>Guest: {n.guest}</p>
                             <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
                               {n.type === 'expiry' ? `Expiring in ${n.time} mins` : `Checked in recently`}
