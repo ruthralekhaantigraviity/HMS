@@ -22,8 +22,35 @@ const StaffDetailModal = ({ staff, onClose }) => {
   );
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
-      <div className="glass-card animate-fade-in" style={{ maxWidth: '750px', width: '100%', padding: '0', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      background: 'rgba(255, 255, 255, 0.3)', 
+      backdropFilter: 'blur(15px)', 
+      WebkitBackdropFilter: 'blur(15px)',
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      zIndex: 9999, 
+      padding: '20px' 
+    }} className="animate-fade-in">
+      <div 
+        className="animate-scale-in" 
+        style={{ 
+          maxWidth: '750px', 
+          width: '100%', 
+          maxHeight: '90vh',
+          overflowY: 'auto', 
+          background: '#ffffff', 
+          borderRadius: '32px', 
+          border: '1px solid rgba(212, 175, 55, 0.4)', 
+          boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+          position: 'relative'
+        }}
+      >
         {/* Modal Header */}
         <div style={{ padding: '40px', background: 'linear-gradient(135deg, var(--primary) 0%, #b8860b 100%)', position: 'relative' }}>
           <button 
@@ -207,7 +234,7 @@ const Staff = () => {
   });
 
   return (
-    <div className="animate-fade-in">
+    <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>
           <h1>Staff Directory</h1>

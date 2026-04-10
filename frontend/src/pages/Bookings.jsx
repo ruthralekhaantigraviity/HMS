@@ -141,7 +141,7 @@ const Bookings = () => {
   }
 
   return (
-    <div className="animate-fade-in">
+    <div style={{ position: 'relative' }}>
       {/* Header Row: Title on Left, Button on Right */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
         <div>
@@ -333,8 +333,35 @@ const Bookings = () => {
 
       {/* Enhanced Multi-Stage Checkout Modal */}
       {checkoutBooking && (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--glass)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div className="glass-card animate-fade-in" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '550px', 
+              maxHeight: '90vh',
+              overflowY: 'auto', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
             {/* Modal Header */}
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -564,8 +591,33 @@ const Bookings = () => {
 
       {/* Add Service Modal */}
       {showServiceModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)', padding: '20px' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '450px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              overflow: 'hidden'
+            }}
+          >
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Add Service to Stay</h2>
@@ -621,8 +673,33 @@ const Bookings = () => {
       )}
       {/* Extend Stay Modal */}
       {showExtendModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(10px)' }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '400px', padding: '0', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              overflow: 'hidden'
+            }}
+          >
             <div style={{ padding: '24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Extend Stay</h2>
@@ -741,16 +818,33 @@ const Bookings = () => {
       {showEnrollModal && (
         <div style={{ 
           position: 'fixed', 
-          inset: 0, 
-          background: 'rgba(0,0,0,0.85)', 
-          backdropFilter: 'blur(10px)', 
-          zIndex: 10000, 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'center',
-          padding: '40px'
-        }}>
-          <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '1100px', height: '90vh', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-main)', position: 'relative' }}>
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '40px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '1100px', 
+              height: '90vh', 
+              overflow: 'hidden', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
              <Enrollment isModal={true} onClose={() => { setShowEnrollModal(false); fetchData(); }} />
           </div>
         </div>

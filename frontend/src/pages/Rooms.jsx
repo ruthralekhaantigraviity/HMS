@@ -278,8 +278,35 @@ const Rooms = () => {
       )}
 
       {showAddRoomModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, backdropFilter: 'blur(10px)' }}>
-          <form onSubmit={handleCreateRoom} className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '450px', padding: '32px', border: '1px solid rgba(212,175,55,0.2)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 9999, 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <form 
+            onSubmit={handleCreateRoom} 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '450px', 
+              padding: '40px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
              <h3 style={{ fontSize: '1.6rem', fontWeight: 900, marginBottom: '24px', color: 'var(--text-main)', letterSpacing: '1px' }}>REGISTER NEW ROOM</h3>
              
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -345,8 +372,35 @@ const RoomDetailModal = ({ room, booking, onClose, onMarkAvailable, navigate, lo
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000, backdropFilter: 'blur(10px)', padding: '20px' }} className="animate-fade-in">
-      <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '600px', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', background: 'var(--surface)', minHeight: '400px' }}>
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      background: 'rgba(255, 255, 255, 0.3)', 
+      backdropFilter: 'blur(15px)', 
+      WebkitBackdropFilter: 'blur(15px)',
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      zIndex: 9999, 
+      padding: '20px' 
+    }} className="animate-fade-in">
+      <div 
+        className="animate-scale-in" 
+        style={{ 
+          width: '100%', 
+          maxWidth: '600px', 
+          maxHeight: '90vh',
+          overflowY: 'auto', 
+          background: '#ffffff', 
+          borderRadius: '32px', 
+          border: '1px solid rgba(212,175,55,0.4)', 
+          boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+          position: 'relative'
+        }}
+      >
         {/* Header Section */}
         <div style={{ padding: '32px', background: 'linear-gradient(135deg, rgba(212,175,55,0.1), transparent)', borderBottom: '1px solid var(--border)', position: 'relative' }}>
           <button onClick={onClose} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={24} /></button>

@@ -216,7 +216,7 @@ const Dashboard = () => {
             <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', color: 'white' }}>
               <BedDouble size={24} />
             </div>
-            <h2 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz <span style={{fontSize: '9px', opacity: 0.6, color: 'var(--primary)' }}>(v4.3.1-SYNC)</span></h2>
+            <h2 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Hotel Glitz <span style={{fontSize: '9px', opacity: 0.6, color: 'var(--primary)' }}>(v4.3.2-SYNC)</span></h2>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {menu.map((item, idx) => (
@@ -356,8 +356,34 @@ const Dashboard = () => {
 
         {/* Quick View Modal */}
         {showModal && selectedBooking && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-            <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '32px', position: 'relative', border: '1px solid var(--primary-glow)' }}>
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(255, 255, 255, 0.3)', 
+          backdropFilter: 'blur(15px)', 
+          WebkitBackdropFilter: 'blur(15px)', 
+          zIndex: 9999, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          padding: '20px' 
+        }} className="animate-fade-in">
+          <div 
+            className="animate-scale-in" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '500px', 
+              padding: '40px', 
+              background: '#ffffff', 
+              borderRadius: '32px', 
+              border: '1px solid rgba(212, 175, 55, 0.4)', 
+              boxShadow: '0 40px 100px -20px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
               <button 
                 onClick={() => setShowModal(false)}
                 style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}

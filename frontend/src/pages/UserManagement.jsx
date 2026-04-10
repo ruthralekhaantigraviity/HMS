@@ -136,7 +136,7 @@ const UserManagement = () => {
         <div>
           <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '8px', letterSpacing: '-1px' }}>User Management</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ padding: '4px 12px', background: 'var(--primary)', color: 'black', borderRadius: '6px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>Secure Access v4.3.0-SYNC</span>
+            <span style={{ padding: '4px 12px', background: 'var(--primary)', color: 'black', borderRadius: '6px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>Secure Access v4.3.2-SYNC</span>
             <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>Configure administrative roles and granular staff permissions</p>
           </div>
         </div>
